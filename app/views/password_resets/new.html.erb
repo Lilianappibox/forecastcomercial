@@ -1,0 +1,19 @@
+<% content_for :title, "Recuperar contraseña" %>
+<div class="min-h-screen w-full brand-gradient flex flex-col items-center justify-center px-4">
+  <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <h1 class="text-xl font-bold text-gray-800 mb-1">Recuperar contraseña</h1>
+    <p class="text-sm text-gray-500 mb-6">Escribe tu correo y te enviamos instrucciones.</p>
+
+    <%= form_with url: password_resets_path, method: :post, class: "space-y-4" do %>
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">Correo electrónico</label>
+        <input type="email" name="email" required
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+      </div>
+      <button type="submit" class="w-full py-2.5 text-white rounded-lg text-sm font-semibold hover:opacity-90" style="background: linear-gradient(135deg, #5B17A8, #C026D3)">
+        Enviar
+      </button>
+      <%= link_to "← Volver a iniciar sesión", login_path, class: "block text-center text-xs text-gray-500 hover:underline" %>
+    <% end %>
+  </div>
+</div>

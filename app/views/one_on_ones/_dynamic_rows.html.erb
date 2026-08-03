@@ -1,0 +1,23 @@
+<%# Locals: field_name (String), columns (Array de {key:, label:, type:}), items (Array de hashes), titulo %>
+<div class="dyn-editor" data-field="<%= field_name %>">
+  <div class="flex items-center justify-between mb-2">
+    <h4 class="text-sm font-semibold text-gray-700"><%= titulo %></h4>
+    <button type="button" class="text-xs text-purple-600 hover:underline dyn-add-row">+ Agregar</button>
+  </div>
+  <div class="grid gap-2 text-xs font-semibold text-gray-500 mb-1 px-1" style="grid-template-columns: repeat(<%= columns.size %>, 1fr) 24px;">
+    <% columns.each do |col| %><div><%= col[:label] %></div><% end %>
+    <div></div>
+  </div>
+  <div class="dyn-rows space-y-1">
+    <% (items.presence || [ {} ]).each do |item| %>
+      <div class="grid gap-2 dyn-row" style="grid-template-columns: repeat(<%= columns.size %>, 1fr) 24px;">
+        <% columns.each do |col| %>
+          <input type="<%= col[:type] || "text" %>" <%= "step=\"0.01\"" if col[:type] == "number" %>
+            class="border border-gray-300 rounded-lg px-2 py-1.5 text-sm dyn-field" data-key="<%= col[:key] %>"
+            placeholder="<%= col[:label] %>" value="<%= item[col[:key].to_s] %>">
+        <% end %>
+        <button type="button" class="text-red-400 hover:text-red-600 dyn-remove-row" title="Quitar">✕</button>
+      </div>
+    <% end %>
+  </div>
+</div>

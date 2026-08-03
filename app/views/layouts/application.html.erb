@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title><%= content_for(:title) || "Admin Comercial Pibox" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    <style>
+      .brand-gradient { background: linear-gradient(135deg, #5B17A8 0%, #7C22D4 50%, #C026D3 100%); }
+      .sidebar { transition: width 0.3s ease; }
+    </style>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <% if logged_in? %>
+      <div id="sidebar" class="fixed top-0 left-0 h-full z-50 sidebar w-16 hover:w-64 brand-gradient overflow-hidden" style="min-width: 64px;">
+        <div class="flex items-center gap-3 px-3 py-4 border-b border-white/10 overflow-hidden whitespace-nowrap">
+          <div class="w-10 h-10 shrink-0 flex items-center justify-center bg-white/20 rounded-lg font-black text-white text-lg">A</div>
+          <span class="text-white/70 text-xs tracking-wide">Admin Comercial</span>
+        </div>
+
+        <nav class="flex flex-col gap-1 px-2 py-3 overflow-y-auto" style="max-height: calc(100vh - 140px)">
+          <% if permisos["verForecast"] %>
+            <%= link_to forecast_entries_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/15 overflow-hidden whitespace-nowrap #{"bg-white !text-purple-700 shadow" if controller_name == "forecast_entries"}" do %>
+              <span class="text-lg shrink-0 w-6 text-center">📈</span>
+              <span>Forecast</span>
+            <% end %>
+          <% end %>
+          <% if permisos["gestionarMetas"] %>
+            <%= link_to goals_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/15 overflow-hidden whitespace-nowrap #{"bg-white !text-purple-700 shadow" if controller_name == "goals"}" do %>
+              <span class="text-lg shrink-0 w-6 text-center">🎯</span>
+              <span>Asignación de Metas</span>
+            <% end %>
+          <% end %>
+          <% if permisos["ver1a1"] %>
+            <%= link_to one_on_ones_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/15 overflow-hidden whitespace-nowrap #{"bg-white !text-purple-700 shadow" if controller_name == "one_on_ones"}" do %>
+              <span class="text-lg shrink-0 w-6 text-center">🧑‍💼</span>
+              <span>1:1 KAM</span>
+            <% end %>
+          <% end %>
+          <% if current_user.admin? %>
+            <%= link_to users_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/15 overflow-hidden whitespace-nowrap #{"bg-white !text-purple-700 shadow" if controller_name == "users"}" do %>
+              <span class="text-lg shrink-0 w-6 text-center">👥</span>
+              <span>Usuarios</span>
+            <% end %>
+          <% end %>
+        </nav>
+
+        <div class="absolute bottom-0 left-0 right-0 border-t border-white/10 px-2 py-3">
+          <div class="flex items-center gap-2 px-3 py-2 overflow-hidden whitespace-nowrap">
+            <div class="w-8 h-8 rounded-full bg-white/20 border border-white/40 font-bold flex items-center justify-center text-sm text-white shrink-0">
+              <%= current_user.initial %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-semibold text-white truncate"><%= current_user.nombre %></p>
+              <span class="text-xs px-1.5 py-0.5 rounded-full font-medium bg-white/20 text-white"><%= current_user.rol %></span>
+            </div>
+          </div>
+          <%= button_to logout_path, method: :delete, class: "w-full mt-1 text-white/60 hover:text-white text-xs px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors text-center" do %>
+            ↩ Cerrar sesión
+          <% end %>
+        </div>
+      </div>
+
+      <main class="ml-16 min-h-screen">
+        <% if notice %><div class="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm"><%= notice %></div><% end %>
+        <% if alert %><div class="fixed top-4 right-4 z-50 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm"><%= alert %></div><% end %>
+        <%= yield %>
+      </main>
+    <% else %>
+      <%= yield %>
+    <% end %>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+<%# Locals: field_name (String, ej. "okr_gestion"), items (Array de hashes), titulo %>
+<div class="okr-editor" data-field="<%= field_name %>">
+  <div class="flex items-center justify-between mb-2">
+    <h4 class="text-sm font-semibold text-gray-700"><%= titulo %></h4>
+    <button type="button" class="text-xs text-purple-600 hover:underline okr-add-row">+ Agregar OKR</button>
+  </div>
+  <div class="grid grid-cols-12 gap-2 text-xs font-semibold text-gray-500 mb-1 px-1">
+    <div class="col-span-6">OKR</div>
+    <div class="col-span-2">Participación %</div>
+    <div class="col-span-3">Meta</div>
+    <div class="col-span-1"></div>
+  </div>
+  <div class="okr-rows space-y-1">
+    <% (items.presence || [ {} ]).each do |item| %>
+      <div class="grid grid-cols-12 gap-2 okr-row">
+        <input type="text" class="col-span-6 border border-gray-300 rounded-lg px-2 py-1.5 text-sm okr-nombre" placeholder="Nombre del OKR" value="<%= item["nombre"] %>">
+        <input type="number" step="0.01" class="col-span-2 border border-gray-300 rounded-lg px-2 py-1.5 text-sm okr-participacion" placeholder="0.30" value="<%= item["participacion"] %>">
+        <input type="number" step="0.01" class="col-span-3 border border-gray-300 rounded-lg px-2 py-1.5 text-sm okr-meta" placeholder="Meta" value="<%= item["meta"] %>">
+        <button type="button" class="col-span-1 text-red-400 hover:text-red-600 okr-remove-row" title="Quitar">✕</button>
+      </div>
+    <% end %>
+  </div>
+  <input type="hidden" name="goal[<%= field_name %>]" class="okr-json-input">
+</div>

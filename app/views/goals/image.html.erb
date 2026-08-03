@@ -1,0 +1,102 @@
+<% content_for :title, "Meta #{@goal.user.nombre}" %>
+<div class="max-w-2xl mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-4 no-export">
+    <%= link_to "← Volver", goals_path, class: "text-sm text-blue-600 hover:underline" %>
+    <button id="download-btn" class="px-4 py-2 text-white rounded-lg text-sm font-semibold hover:opacity-90" style="background: linear-gradient(135deg, #5B17A8, #C026D3)">⬇️ Descargar imagen</button>
+  </div>
+
+  <div id="meta-card" class="rounded-2xl overflow-hidden shadow-xl" style="background: #ffffff; font-family: Arial, sans-serif;">
+    <div class="p-6 text-white" style="background: linear-gradient(135deg, #5B17A8 0%, #7C22D4 50%, #C026D3 100%)">
+      <div class="inline-block bg-white rounded-lg px-3 py-2 mb-4">
+        <%= image_tag "pibox-logo.png", alt: "Pibox", style: "height: 24px; display: block;" %>
+      </div>
+      <p class="text-sm opacity-90">Meta comercial</p>
+      <h1 class="text-2xl font-bold"><%= @goal.user.nombre %></h1>
+      <p class="text-sm opacity-90"><%= mes_nombre(@goal.month) %> <%= @goal.year %></p>
+    </div>
+
+    <div class="p-6 space-y-6">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p class="text-xs text-gray-500 font-semibold mb-1">GMV Meta</p>
+          <p class="text-xl font-bold text-gray-800"><%= fmt(@goal.gmv_meta) %></p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p class="text-xs text-gray-500 font-semibold mb-1">Income esperado (<%= fmt_pct(@goal.income_pct) %>)</p>
+          <p class="text-xl font-bold text-gray-800"><%= fmt(@goal.income_esperado) %></p>
+        </div>
+      </div>
+
+      <% if @goal.okr_gestion.present? %>
+        <div>
+          <p class="text-xs font-semibold text-gray-500 mb-2">🎯 OKR Gestión</p>
+          <table class="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+            <thead class="bg-gray-100 text-xs text-gray-600">
+              <tr>
+                <th class="text-left px-3 py-2">OKR</th>
+                <th class="text-right px-3 py-2">Participación</th>
+                <th class="text-right px-3 py-2">Meta</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <% @goal.okr_gestion.each do |item| %>
+                <tr>
+                  <td class="px-3 py-2 text-gray-700"><%= item["nombre"] %></td>
+                  <td class="px-3 py-2 text-right text-gray-600"><%= fmt_pct(item["participacion"].to_f) %></td>
+                  <td class="px-3 py-2 text-right text-gray-600"><%= item["meta"] %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+
+      <% if @goal.okr_asistencia.present? %>
+        <div>
+          <p class="text-xs font-semibold text-gray-500 mb-2">📋 OKR Asistencia</p>
+          <table class="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+            <thead class="bg-gray-100 text-xs text-gray-600">
+              <tr>
+                <th class="text-left px-3 py-2">OKR</th>
+                <th class="text-right px-3 py-2">Participación</th>
+                <th class="text-right px-3 py-2">Meta</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <% @goal.okr_asistencia.each do |item| %>
+                <tr>
+                  <td class="px-3 py-2 text-gray-700"><%= item["nombre"] %></td>
+                  <td class="px-3 py-2 text-right text-gray-600"><%= fmt_pct(item["participacion"].to_f) %></td>
+                  <td class="px-3 py-2 text-right text-gray-600"><%= item["meta"] %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+
+      <% if @goal.comentarios.present? %>
+        <div class="border-t border-gray-100 pt-4">
+          <p class="text-xs font-semibold text-gray-500 mb-1">Comentarios</p>
+          <p class="text-sm text-gray-600"><%= @goal.comentarios %></p>
+        </div>
+      <% end %>
+
+      <p class="text-center text-xs text-gray-300 pt-2">P I B O X</p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import html2canvas from "html2canvas";
+
+  document.getElementById("download-btn").addEventListener("click", function () {
+    var card = document.getElementById("meta-card");
+    html2canvas(card, { scale: 2, backgroundColor: "#ffffff" }).then(function (canvas) {
+      var link = document.createElement("a");
+      link.download = "meta-<%= @goal.user.nombre.parameterize %>-<%= @goal.year %>-<%= @goal.month %>.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+  });
+</script>

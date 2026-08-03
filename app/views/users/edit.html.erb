@@ -1,0 +1,7 @@
+<% content_for :title, "Editar usuario" %>
+<div class="max-w-3xl mx-auto px-4 py-6">
+  <h1 class="text-xl font-bold text-gray-800 mb-6">👥 Editar usuario — <%= @user.nombre %></h1>
+  <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-6">
+    <%= render "form", user: @user, permisos_configurables: @permisos_configurables %>
+  </div>
+</div>

@@ -1,0 +1,143 @@
+<% content_for :title, "1:1 — #{@entry.user.nombre}" %>
+<div class="max-w-4xl mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-bold text-gray-800">🧑‍💼 1:1 — <%= @entry.user.nombre %> · <%= mes_nombre(@entry.month) %> <%= @entry.year %></h1>
+    <%= link_to "← Historial", one_on_ones_path, class: "text-sm text-blue-600 hover:underline" %>
+  </div>
+
+  <%= form_with model: @entry, url: one_on_one_path(@entry), method: :patch, class: "space-y-6", id: "oo-form" do |f| %>
+    <% if @entry.errors.any? %>
+      <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
+        <p class="font-semibold mb-2">Por favor corrige los siguientes errores:</p>
+        <ul class="list-disc list-inside space-y-1">
+          <% @entry.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <input type="hidden" name="one_on_one_entry[data]" id="data-json-input">
+
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <%= render "scalar_group", field_name: "prospeccion", titulo: "🔍 Prospección",
+          values: @entry.seccion(:prospeccion),
+          fields: [ { key: "propios", label: "Prospectos propios" }, { key: "referidos", label: "Prospectos referidos" }, { key: "mkt", label: "Prospectos MKT" } ] %>
+    </div>
+
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <%= render "scalar_group", field_name: "reuniones", titulo: "🤝 Reuniones / Visitas",
+          values: @entry.seccion(:reuniones),
+          fields: [ { key: "cantidad", label: "# Reuniones" } ] %>
+    </div>
+
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <%= render "scalar_group", field_name: "pipeline", titulo: "📈 Pipeline de Ventas",
+          values: @entry.seccion(:pipeline),
+          fields: [
+            { key: "negocios_mkt", label: "# Negocios MKT" }, { key: "valor_mkt", label: "$ Negocios MKT" },
+            { key: "negocios_referidos", label: "# Referidos" }, { key: "valor_referidos", label: "$ Referidos" },
+            { key: "negocios_propios", label: "# Propios" }, { key: "valor_propios", label: "$ Propios" }
+          ] %>
+    </div>
+
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <%= render "dynamic_rows", field_name: "cierres", titulo: "🏁 Cierres / Ventas Concretadas",
+          items: @entry.seccion(:cierres),
+          columns: [ { key: "cliente", label: "Cliente" }, { key: "gmv", label: "GMV", type: "number" } ] %>
+    </div>
+
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <%= render "dynamic_rows", field_name: "clientes_gestion", titulo: "🔁 Clientes en Gestión / Retención",
+          items: @entry.seccion(:clientes_gestion),
+          columns: [ { key: "cliente", label: "Cliente" }, { key: "motivo", label: "Motivo" }, { key: "gmv", label: "GMV", type: "number" } ] %>
+    </div>
+
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <%= render "dynamic_rows", field_name: "alertas", titulo: "⚠️ Alertas / Necesidades de Dirección",
+          items: @entry.seccion(:alertas),
+          columns: [ { key: "area", label: "Área" }, { key: "cliente", label: "Cliente" }, { key: "tema", label: "Tema" } ] %>
+    </div>
+
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <%= render "dynamic_rows", field_name: "plan_accion", titulo: "🔄 Plan de Acción",
+          items: @entry.seccion(:plan_accion),
+          columns: [ { key: "tema", label: "Tema" }, { key: "compromiso", label: "Compromiso" } ] %>
+    </div>
+
+    <div class="bg-purple-50 border border-purple-100 rounded-xl p-4">
+      <h3 class="text-sm font-semibold text-purple-800 mb-3">✨ Insights de gestión del mes</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-600 mb-1 block">Puntos fuertes</label>
+          <%= f.text_area :puntos_fuertes, rows: 3, class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-gray-600 mb-1 block">Puntos de mejora</label>
+          <%= f.text_area :puntos_mejora, rows: 3, class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex gap-3">
+      <%= f.submit "Guardar 1:1", class: "px-6 py-2 text-white rounded-lg text-sm font-semibold cursor-pointer hover:opacity-90", style: "background: linear-gradient(135deg, #5B17A8, #C026D3)" %>
+      <%= link_to "Cancelar", one_on_ones_path, class: "px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium" %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+(function () {
+  document.querySelectorAll(".dyn-editor").forEach(function (editor) {
+    var rowsContainer = editor.querySelector(".dyn-rows");
+    editor.querySelector(".dyn-add-row").addEventListener("click", function () {
+      var template = rowsContainer.querySelector(".dyn-row");
+      var clone = template.cloneNode(true);
+      clone.querySelectorAll("input").forEach(function (input) { input.value = ""; });
+      rowsContainer.appendChild(clone);
+    });
+    rowsContainer.addEventListener("click", function (e) {
+      if (e.target.classList.contains("dyn-remove-row")) {
+        if (rowsContainer.querySelectorAll(".dyn-row").length > 1) {
+          e.target.closest(".dyn-row").remove();
+        }
+      }
+    });
+  });
+
+  function buildData() {
+    var data = {};
+
+    document.querySelectorAll(".scalar-editor").forEach(function (editor) {
+      var obj = {};
+      editor.querySelectorAll(".scalar-field").forEach(function (input) {
+        if (input.value !== "") obj[input.dataset.key] = parseFloat(input.value);
+      });
+      data[editor.dataset.field] = obj;
+    });
+
+    document.querySelectorAll(".dyn-editor").forEach(function (editor) {
+      var rows = [];
+      editor.querySelectorAll(".dyn-row").forEach(function (row) {
+        var obj = {};
+        var hasValue = false;
+        row.querySelectorAll(".dyn-field").forEach(function (input) {
+          if (input.value !== "") {
+            hasValue = true;
+            obj[input.dataset.key] = input.type === "number" ? parseFloat(input.value) : input.value;
+          }
+        });
+        if (hasValue) rows.push(obj);
+      });
+      data[editor.dataset.field] = rows;
+    });
+
+    return data;
+  }
+
+  var form = document.getElementById("oo-form");
+  if (form) {
+    form.addEventListener("submit", function () {
+      document.getElementById("data-json-input").value = JSON.stringify(buildData());
+    });
+  }
+})();
+</script>

@@ -1,0 +1,112 @@
+<%# Locals: goal, kams %>
+<%= form_with model: goal, url: (goal.new_record? ? goals_path : goal_path(goal)), class: "space-y-6", id: "goal-form" do |f| %>
+  <% if goal.errors.any? %>
+    <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
+      <p class="font-semibold mb-2">Por favor corrige los siguientes errores:</p>
+      <ul class="list-disc list-inside space-y-1">
+        <% goal.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="md:col-span-2">
+      <label class="text-xs font-semibold text-gray-600 mb-1 block">KAM *</label>
+      <% if goal.new_record? %>
+        <%= f.select :user_id, kams.map { |k| [ k.nombre, k.id ] },
+            { include_blank: "Selecciona un KAM" },
+            class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
+      <% else %>
+        <div class="w-full border border-gray-200 bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-600"><%= goal.user.nombre %></div>
+        <%= f.hidden_field :user_id %>
+      <% end %>
+    </div>
+    <div>
+      <label class="text-xs font-semibold text-gray-600 mb-1 block">Mes *</label>
+      <%= f.select :month, (1..12).map { |m| [ mes_nombre(m), m ] },
+          {}, class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
+    </div>
+    <div>
+      <label class="text-xs font-semibold text-gray-600 mb-1 block">Año *</label>
+      <%= f.number_field :year, class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
+    </div>
+    <div>
+      <label class="text-xs font-semibold text-gray-600 mb-1 block">Meta GMV *</label>
+      <%= f.number_field :gmv_meta, step: "1", class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
+    </div>
+    <div>
+      <label class="text-xs font-semibold text-gray-600 mb-1 block">Income esperado %</label>
+      <%= f.number_field :income_pct, step: "0.01", class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
+    </div>
+  </div>
+
+  <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+    <%= render "goals/okr_table", field_name: "okr_gestion", items: goal.okr_gestion, titulo: "🎯 OKR Gestión" %>
+  </div>
+
+  <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+    <%= render "goals/okr_table", field_name: "okr_asistencia", items: goal.okr_asistencia, titulo: "📋 OKR Asistencia" %>
+  </div>
+
+  <div>
+    <label class="text-xs font-semibold text-gray-600 mb-1 block">Comentarios adicionales</label>
+    <%= f.text_area :comentarios, rows: 3, class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
+  </div>
+
+  <div class="flex gap-3">
+    <%= f.submit goal.new_record? ? "Asignar meta" : "Actualizar meta",
+        class: "px-6 py-2 text-white rounded-lg text-sm font-semibold cursor-pointer hover:opacity-90",
+        style: "background: linear-gradient(135deg, #5B17A8, #C026D3)" %>
+    <%= link_to "Cancelar", goals_path, class: "px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium" %>
+  </div>
+<% end %>
+
+<script>
+(function () {
+  function rowToObj(row) {
+    return {
+      nombre: row.querySelector(".okr-nombre").value,
+      participacion: parseFloat(row.querySelector(".okr-participacion").value || "0"),
+      meta: parseFloat(row.querySelector(".okr-meta").value || "0")
+    };
+  }
+
+  function serialize(editor) {
+    var rows = editor.querySelectorAll(".okr-row");
+    var items = [];
+    rows.forEach(function (row) {
+      var obj = rowToObj(row);
+      if (obj.nombre.trim() !== "") items.push(obj);
+    });
+    editor.querySelector(".okr-json-input").value = JSON.stringify(items);
+  }
+
+  document.querySelectorAll(".okr-editor").forEach(function (editor) {
+    var rowsContainer = editor.querySelector(".okr-rows");
+
+    editor.querySelector(".okr-add-row").addEventListener("click", function () {
+      var template = rowsContainer.querySelector(".okr-row");
+      var clone = template.cloneNode(true);
+      clone.querySelectorAll("input").forEach(function (input) { input.value = ""; });
+      rowsContainer.appendChild(clone);
+    });
+
+    rowsContainer.addEventListener("click", function (e) {
+      if (e.target.classList.contains("okr-remove-row")) {
+        if (rowsContainer.querySelectorAll(".okr-row").length > 1) {
+          e.target.closest(".okr-row").remove();
+        }
+      }
+    });
+  });
+
+  var form = document.getElementById("goal-form");
+  if (form) {
+    form.addEventListener("submit", function () {
+      document.querySelectorAll(".okr-editor").forEach(serialize);
+    });
+  }
+})();
+</script>

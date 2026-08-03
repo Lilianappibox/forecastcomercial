@@ -1,0 +1,16 @@
+<% content_for :title, "Recuperar contraseña" %>
+<div class="min-h-screen w-full brand-gradient flex flex-col items-center justify-center px-4">
+  <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center">
+    <h1 class="text-xl font-bold text-gray-800 mb-2">✓ Solicitud recibida</h1>
+    <p class="text-sm text-gray-500 mb-4">Si el correo existe, te llegarán instrucciones para restablecer la contraseña.</p>
+
+    <% if @reset_url %>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-left mb-4">
+        <p class="text-xs text-yellow-700 font-semibold mb-1">Modo desarrollo — envío de correo aún no configurado:</p>
+        <%= link_to "Definir nueva contraseña →", @reset_url, class: "text-sm text-purple-700 underline break-all" %>
+      </div>
+    <% end %>
+
+    <%= link_to "← Volver a iniciar sesión", login_path, class: "text-xs text-gray-500 hover:underline" %>
+  </div>
+</div>
