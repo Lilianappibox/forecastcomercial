@@ -73,7 +73,8 @@
   function rowToObj(row) {
     return {
       nombre: row.querySelector(".okr-nombre").value,
-      participacion: parseFloat(row.querySelector(".okr-participacion").value || "0"),
+      // El campo se diligencia como número entero (30 = 30%); se guarda como fracción (0.30) para los cálculos.
+      participacion: parseFloat(row.querySelector(".okr-participacion").value || "0") / 100,
       meta: parseFloat(row.querySelector(".okr-meta").value || "0"),
       unidad: row.querySelector(".okr-unidad").value
     };
