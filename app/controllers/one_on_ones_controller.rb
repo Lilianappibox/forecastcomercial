@@ -11,6 +11,16 @@ class OneOnOnesController < ApplicationController
     end
   end
 
+  def evolucion
+    @kams = User.where(rol: "KAM").order(:nombre) if current_user.admin?
+    @kam_id = current_user.admin? ? (params[:kam_id].presence&.to_i || @kams.first&.id) : current_user.id
+    @kam = User.find_by(id: @kam_id)
+    @year = (params[:year] || Date.current.year).to_i
+    resumen = OneOnOneEntry.resumen_anual(@kam_id, @year)
+    @meses_data = resumen[:meses]
+    @totales = resumen[:total]
+  end
+
   def entrar
     user_id = current_user.admin? ? params[:user_id] : current_user.id
     year = params[:year] || Date.current.year

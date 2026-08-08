@@ -15,7 +15,7 @@ Rails.application.routes.draw do
   end
   resources :forecast_entries, path: "forecast", only: [ :index ]
   resources :one_on_ones, path: "uno_a_uno", only: [ :index, :show, :edit, :update ] do
-    collection { get :entrar }
+    collection { get :entrar; get :evolucion }
   end
   resources :clientes
 

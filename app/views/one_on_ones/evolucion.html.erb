@@ -1,0 +1,224 @@
+<% content_for :title, "Evolución anual" %>
+<div class="max-w-6xl mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-xl font-bold text-gray-800">📊 Evolución anual<%= " — #{@kam.nombre}" if @kam %></h1>
+      <p class="text-sm text-gray-500">Enero a diciembre <%= @year %></p>
+    </div>
+    <%= link_to "← 1:1", one_on_ones_path, class: "text-sm text-blue-600 hover:underline" %>
+  </div>
+
+  <%= form_with url: evolucion_one_on_ones_path, method: :get, class: "flex items-end gap-3 mb-6" do %>
+    <% if current_user.admin? %>
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">KAM</label>
+        <select name="kam_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          <% @kams.each do |k| %>
+            <option value="<%= k.id %>" <%= "selected" if k.id == @kam_id %>><%= k.nombre %></option>
+          <% end %>
+        </select>
+      </div>
+    <% end %>
+    <div>
+      <label class="text-xs font-semibold text-gray-600 mb-1 block">Año</label>
+      <input type="number" name="year" value="<%= @year %>" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-28">
+    </div>
+    <button type="submit" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">Ver</button>
+  <% end %>
+
+  <% if @meses_data.all? { |m| m[:gmv_real].nil? && m[:reuniones].to_f.zero? && m[:prospeccion].to_f.zero? } %>
+    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-700 mb-6">
+      Todavía no hay 1:1 diligenciados en <%= @year %> para calcular la evolución.
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">📈 GMV real vs. Meta</h3>
+      <canvas id="chart-gmv" height="220"></canvas>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">🎯 Cumplimiento OKR (%)</h3>
+      <canvas id="chart-okr" height="220"></canvas>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">🔍 Prospección</h3>
+      <canvas id="chart-prospeccion" height="220"></canvas>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">🤝 Reuniones</h3>
+      <canvas id="chart-reuniones" height="220"></canvas>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">📈 Pipeline ($ y # negocios)</h3>
+      <canvas id="chart-pipeline" height="220"></canvas>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">🏁 Cierres ($ y # ventas)</h3>
+      <canvas id="chart-cierres" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+        <tr>
+          <th class="text-left px-3 py-2">Mes</th>
+          <th class="text-right px-3 py-2">Meta GMV</th>
+          <th class="text-right px-3 py-2">GMV real</th>
+          <th class="text-right px-3 py-2">Cumplimiento</th>
+          <th class="text-right px-3 py-2">OKR Gestión</th>
+          <th class="text-right px-3 py-2">OKR Asistencia</th>
+          <th class="text-right px-3 py-2">Prospección</th>
+          <th class="text-right px-3 py-2">Reuniones</th>
+          <th class="text-right px-3 py-2">Pipeline $</th>
+          <th class="text-right px-3 py-2">Cierres #</th>
+          <th class="text-right px-3 py-2">Cierres $</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @meses_data.each do |m| %>
+          <tr class="hover:bg-gray-50">
+            <td class="px-3 py-2 font-medium text-gray-800"><%= mes_nombre(m[:mes]) %></td>
+            <td class="px-3 py-2 text-right text-gray-600"><%= fmt(m[:meta_gmv]) %></td>
+            <td class="px-3 py-2 text-right text-gray-600"><%= fmt(m[:gmv_real]) %></td>
+            <td class="px-3 py-2 text-right">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(m[:cumplimiento_gmv]) %>"><%= fmt_pct(m[:cumplimiento_gmv]) %></span>
+            </td>
+            <td class="px-3 py-2 text-right">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(m[:okr_gestion]) %>"><%= fmt_pct(m[:okr_gestion]) %></span>
+            </td>
+            <td class="px-3 py-2 text-right">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(m[:okr_asistencia]) %>"><%= fmt_pct(m[:okr_asistencia]) %></span>
+            </td>
+            <td class="px-3 py-2 text-right text-gray-600"><%= m[:prospeccion].to_i %></td>
+            <td class="px-3 py-2 text-right text-gray-600"><%= m[:reuniones].to_i %></td>
+            <td class="px-3 py-2 text-right text-gray-600"><%= fmt(m[:pipeline_valor]) %></td>
+            <td class="px-3 py-2 text-right text-gray-600"><%= m[:cierres_count].to_i %></td>
+            <td class="px-3 py-2 text-right text-gray-600"><%= fmt(m[:cierres_gmv]) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+      <tfoot>
+        <tr class="bg-gray-50 font-semibold">
+          <td class="px-3 py-2">Total <%= @year %></td>
+          <td class="px-3 py-2 text-right"><%= fmt(@totales[:meta_gmv]) %></td>
+          <td class="px-3 py-2 text-right"><%= fmt(@totales[:gmv_real]) %></td>
+          <td class="px-3 py-2 text-right">
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(@totales[:cumplimiento_gmv]) %>"><%= fmt_pct(@totales[:cumplimiento_gmv]) %></span>
+          </td>
+          <td class="px-3 py-2 text-right">
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(@totales[:okr_gestion]) %>" title="Promedio de los meses diligenciados"><%= fmt_pct(@totales[:okr_gestion]) %></span>
+          </td>
+          <td class="px-3 py-2 text-right">
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(@totales[:okr_asistencia]) %>" title="Promedio de los meses diligenciados"><%= fmt_pct(@totales[:okr_asistencia]) %></span>
+          </td>
+          <td class="px-3 py-2 text-right"><%= @totales[:prospeccion].to_i %></td>
+          <td class="px-3 py-2 text-right"><%= @totales[:reuniones].to_i %></td>
+          <td class="px-3 py-2 text-right"><%= fmt(@totales[:pipeline_valor]) %></td>
+          <td class="px-3 py-2 text-right"><%= @totales[:cierres_count] %></td>
+          <td class="px-3 py-2 text-right"><%= fmt(@totales[:cierres_gmv]) %></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  <p class="text-xs text-gray-400 mt-2">OKR Gestión/Asistencia en el total muestran el promedio de los meses diligenciados; el resto son sumas del año.</p>
+</div>
+
+<script type="module">
+  // El build UMD de chart.js ya viene con todos los controllers/plugins
+  // registrados (a diferencia de la build ESM "core" que exige
+  // Chart.register(...registerables) explícito).
+  import "chart.js";
+
+  const meses = <%= raw @meses_data.map { |m| mes_corto("#{@year}-#{m[:mes].to_s.rjust(2, "0")}") }.to_json %>;
+  const data = <%= raw @meses_data.to_json %>;
+  const pct = (v) => v === null ? null : Math.round(v * 1000) / 10;
+
+  const colors = {
+    blue: "#3b82f6", green: "#10b981", violet: "#a78bfa", amber: "#f59e0b",
+    pink: "#ec4899", teal: "#2dd4bf", gray: "#9ca3af"
+  };
+
+  new Chart(document.getElementById("chart-gmv"), {
+    type: "bar",
+    data: {
+      labels: meses,
+      datasets: [
+        { type: "bar", label: "GMV real", data: data.map(d => d.gmv_real), backgroundColor: colors.blue },
+        { type: "line", label: "Meta GMV", data: data.map(d => d.meta_gmv), borderColor: colors.gray, backgroundColor: colors.gray, tension: 0.3 }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+  });
+
+  new Chart(document.getElementById("chart-okr"), {
+    type: "line",
+    data: {
+      labels: meses,
+      datasets: [
+        { label: "OKR Gestión", data: data.map(d => pct(d.okr_gestion)), borderColor: colors.violet, backgroundColor: colors.violet, tension: 0.3 },
+        { label: "OKR Asistencia", data: data.map(d => pct(d.okr_asistencia)), borderColor: colors.amber, backgroundColor: colors.amber, tension: 0.3 }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: "bottom" } }, scales: { y: { ticks: { callback: (v) => v + "%" } } } }
+  });
+
+  new Chart(document.getElementById("chart-prospeccion"), {
+    type: "bar",
+    data: {
+      labels: meses,
+      datasets: [
+        { label: "Propios", data: data.map(d => d.prospeccion_propios), backgroundColor: colors.blue, stack: "p" },
+        { label: "Referidos", data: data.map(d => d.prospeccion_referidos), backgroundColor: colors.green, stack: "p" },
+        { label: "MKT", data: data.map(d => d.prospeccion_mkt), backgroundColor: colors.pink, stack: "p" }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: "bottom" } }, scales: { x: { stacked: true }, y: { stacked: true } } }
+  });
+
+  new Chart(document.getElementById("chart-reuniones"), {
+    type: "bar",
+    data: {
+      labels: meses,
+      datasets: [ { label: "# Reuniones", data: data.map(d => d.reuniones), backgroundColor: colors.teal } ]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+  });
+
+  new Chart(document.getElementById("chart-pipeline"), {
+    type: "bar",
+    data: {
+      labels: meses,
+      datasets: [
+        { type: "bar", label: "Pipeline $", data: data.map(d => d.pipeline_valor), backgroundColor: colors.blue, yAxisID: "y" },
+        { type: "line", label: "# Negocios", data: data.map(d => d.pipeline_negocios), borderColor: colors.amber, backgroundColor: colors.amber, tension: 0.3, yAxisID: "y1" }
+      ]
+    },
+    options: {
+      responsive: true, plugins: { legend: { position: "bottom" } },
+      scales: {
+        y: { type: "linear", position: "left", ticks: { callback: (v) => "$" + v.toLocaleString("es-CO") } },
+        y1: { type: "linear", position: "right", grid: { drawOnChartArea: false } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById("chart-cierres"), {
+    type: "bar",
+    data: {
+      labels: meses,
+      datasets: [
+        { type: "bar", label: "Cierres $", data: data.map(d => d.cierres_gmv), backgroundColor: colors.green, yAxisID: "y" },
+        { type: "line", label: "# Cierres", data: data.map(d => d.cierres_count), borderColor: colors.violet, backgroundColor: colors.violet, tension: 0.3, yAxisID: "y1" }
+      ]
+    },
+    options: {
+      responsive: true, plugins: { legend: { position: "bottom" } },
+      scales: {
+        y: { type: "linear", position: "left", ticks: { callback: (v) => "$" + v.toLocaleString("es-CO") } },
+        y1: { type: "linear", position: "right", grid: { drawOnChartArea: false } }
+      }
+    }
+  });
+</script>

@@ -1,6 +1,9 @@
 <% content_for :title, "1:1 KAM" %>
 <div class="max-w-4xl mx-auto px-4 py-6">
-  <h1 class="text-xl font-bold text-gray-800 mb-6">🧑‍💼 1:1 KAM</h1>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-bold text-gray-800">🧑‍💼 1:1 KAM</h1>
+    <%= link_to "📊 Evolución anual", evolucion_one_on_ones_path, class: "text-sm text-purple-600 hover:underline font-medium" %>
+  </div>
 
   <% if current_user.admin? %>
     <div class="space-y-4">
