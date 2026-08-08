@@ -1,22 +1,33 @@
-<%# Locals: field_name (String), meta_items (Array de hashes del Goal), realizados (Array de hashes ya guardados), titulo %>
-<% return if meta_items.blank? %>
-<% realizados_por_nombre = (realizados || []).index_by { |r| r["nombre"] } %>
+<%# Locals: field_name (String), goal (Goal), tipo (:gestion o :asistencia), realizados (Array de hashes ya guardados), titulo %>
+<% rows = goal.okr_rows(tipo, realizados) %>
+<% return if rows.blank? %>
+<% total = goal.total_ponderado(tipo, realizados) %>
 <div class="realizado-editor" data-field="<%= field_name %>">
-  <h4 class="text-sm font-semibold text-gray-700 mb-2"><%= titulo %></h4>
+  <div class="flex items-center justify-between mb-2">
+    <h4 class="text-sm font-semibold text-gray-700"><%= titulo %></h4>
+    <span class="px-2 py-0.5 rounded-full text-xs font-semibold total-cumplimiento <%= pct_badge_class(total) %>">Total: <%= fmt_pct(total) %></span>
+  </div>
   <div class="grid grid-cols-12 gap-2 text-xs font-semibold text-gray-500 mb-1 px-1">
-    <div class="col-span-6">OKR</div>
-    <div class="col-span-3">Meta</div>
-    <div class="col-span-3">Realizado</div>
+    <div class="col-span-4">OKR</div>
+    <div class="col-span-2">Meta</div>
+    <div class="col-span-2">Realizado</div>
+    <div class="col-span-2">Cumplimiento</div>
+    <div class="col-span-2">Participación</div>
   </div>
   <div class="space-y-1">
-    <% meta_items.each do |item| %>
-      <div class="grid grid-cols-12 gap-2 items-center realizado-row">
-        <div class="col-span-6 text-sm text-gray-700 px-2"><%= item["nombre"] %></div>
-        <div class="col-span-3 text-sm text-gray-500 px-2"><%= fmt_meta(item["meta"], item["unidad"]) %></div>
+    <% rows.each do |row| %>
+      <div class="grid grid-cols-12 gap-2 items-center realizado-row"
+           data-meta="<%= row[:meta].to_f %>" data-participacion="<%= row[:participacion] %>">
+        <div class="col-span-4 text-sm text-gray-700 px-2"><%= row[:nombre] %></div>
+        <div class="col-span-2 text-sm text-gray-500 px-2"><%= fmt_meta(row[:meta], row[:unidad]) %></div>
         <input type="number" step="0.01"
-          class="col-span-3 border border-gray-300 rounded-lg px-2 py-1.5 text-sm realizado-valor"
-          data-nombre="<%= item["nombre"] %>"
-          value="<%= realizados_por_nombre[item["nombre"]]&.dig("realizado") %>">
+          class="col-span-2 border border-gray-300 rounded-lg px-2 py-1.5 text-sm realizado-valor"
+          data-nombre="<%= row[:nombre] %>"
+          value="<%= row[:realizado] %>">
+        <div class="col-span-2">
+          <span class="px-2 py-0.5 rounded-full text-xs font-semibold cumplimiento-valor <%= pct_badge_class(row[:cumplimiento]) %>"><%= fmt_pct(row[:cumplimiento]) %></span>
+        </div>
+        <div class="col-span-2 text-sm text-gray-500 px-2"><%= fmt_pct(row[:participacion]) %></div>
       </div>
     <% end %>
   </div>
