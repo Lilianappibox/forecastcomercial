@@ -39,8 +39,14 @@
           <% @kams.each do |kam| %>
             <% goal = @goals_by_user[kam.id] %>
             <% one_on_one = @one_on_ones_by_user[kam.id] %>
-            <tr class="hover:bg-gray-50">
-              <td class="px-4 py-3 font-medium text-gray-800"><%= kam.nombre %></td>
+            <% color = kam_color(kam) %>
+            <tr class="<%= color[:bg] %> border-l-4 <%= color[:border] %> hover:brightness-95">
+              <td class="px-4 py-3 font-medium text-gray-800">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-full <%= color[:dot] %> text-white text-xs font-bold flex items-center justify-center shrink-0"><%= kam.initial %></span>
+                  <%= kam.nombre %>
+                </div>
+              </td>
               <td class="px-4 py-3 text-right"><%= goal ? fmt(goal.gmv_meta) : "—" %></td>
               <td class="px-4 py-3 text-right"><%= one_on_one ? fmt(one_on_one.gmv_real) : "—" %></td>
               <td class="px-4 py-3 text-right">

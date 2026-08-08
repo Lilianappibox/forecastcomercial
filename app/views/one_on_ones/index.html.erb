@@ -5,10 +5,14 @@
   <% if current_user.admin? %>
     <div class="space-y-4">
       <% @kams.each do |kam| %>
-        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+        <% color = kam_color(kam) %>
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 border-l-4 <%= color[:border] %> p-4">
           <div class="flex items-center justify-between mb-2">
-            <h3 class="font-semibold text-gray-800"><%= kam.nombre %></h3>
-            <%= link_to "+ Ir al mes actual", entrar_one_on_ones_path(user_id: kam.id, year: Date.current.year, month: Date.current.month), class: "text-xs text-purple-600 hover:underline" %>
+            <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full <%= color[:dot] %> text-white text-xs font-bold flex items-center justify-center shrink-0"><%= kam.initial %></span>
+              <%= kam.nombre %>
+            </h3>
+            <%= link_to "+ Ir al mes actual", entrar_one_on_ones_path(user_id: kam.id, year: Date.current.year, month: Date.current.month), class: "text-xs #{color[:text]} hover:underline" %>
           </div>
           <% entries = (@entries_by_kam[kam.id] || []).sort_by { |e| [ -e.year, -e.month ] } %>
           <% if entries.empty? %>

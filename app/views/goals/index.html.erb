@@ -40,8 +40,14 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <% @goals.each do |goal| %>
-            <tr class="hover:bg-gray-50">
-              <td class="px-4 py-3 font-medium text-gray-800"><%= goal.user.nombre %></td>
+            <% color = kam_color(goal.user) %>
+            <tr class="<%= color[:bg] %> border-l-4 <%= color[:border] %> hover:brightness-95">
+              <td class="px-4 py-3 font-medium text-gray-800">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-full <%= color[:dot] %> text-white text-xs font-bold flex items-center justify-center shrink-0"><%= goal.user.initial %></span>
+                  <%= goal.user.nombre %>
+                </div>
+              </td>
               <td class="px-4 py-3 text-gray-600"><%= mes_nombre(goal.month) %> <%= goal.year %></td>
               <td class="px-4 py-3 text-right"><%= fmt(goal.gmv_meta) %></td>
               <td class="px-4 py-3 text-right text-gray-600"><%= fmt(goal.income_esperado) %></td>
