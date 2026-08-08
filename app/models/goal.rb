@@ -40,6 +40,7 @@ class Goal < ApplicationRecord
         nombre: item["nombre"],
         participacion: item["participacion"].to_f,
         meta: item["meta"],
+        unidad: item["unidad"],
         realizado: realizado_valor,
         cumplimiento: cumplimiento
       }

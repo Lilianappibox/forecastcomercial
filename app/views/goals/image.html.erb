@@ -56,7 +56,7 @@
                 <tr>
                   <td class="px-3 py-2 text-gray-700"><%= item["nombre"] %></td>
                   <td class="px-3 py-2 text-right text-gray-600"><%= fmt_pct(item["participacion"].to_f) %></td>
-                  <td class="px-3 py-2 text-right text-gray-600"><%= item["meta"] %></td>
+                  <td class="px-3 py-2 text-right text-gray-600"><%= fmt_meta(item["meta"], item["unidad"]) %></td>
                 </tr>
               <% end %>
             </tbody>
@@ -80,7 +80,7 @@
                 <tr>
                   <td class="px-3 py-2 text-gray-700"><%= item["nombre"] %></td>
                   <td class="px-3 py-2 text-right text-gray-600"><%= fmt_pct(item["participacion"].to_f) %></td>
-                  <td class="px-3 py-2 text-right text-gray-600"><%= item["meta"] %></td>
+                  <td class="px-3 py-2 text-right text-gray-600"><%= fmt_meta(item["meta"], item["unidad"]) %></td>
                 </tr>
               <% end %>
             </tbody>

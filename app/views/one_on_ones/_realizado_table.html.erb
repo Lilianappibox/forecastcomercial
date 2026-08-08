@@ -12,7 +12,7 @@
     <% meta_items.each do |item| %>
       <div class="grid grid-cols-12 gap-2 items-center realizado-row">
         <div class="col-span-6 text-sm text-gray-700 px-2"><%= item["nombre"] %></div>
-        <div class="col-span-3 text-sm text-gray-500 px-2"><%= item["meta"] %></div>
+        <div class="col-span-3 text-sm text-gray-500 px-2"><%= fmt_meta(item["meta"], item["unidad"]) %></div>
         <input type="number" step="0.01"
           class="col-span-3 border border-gray-300 rounded-lg px-2 py-1.5 text-sm realizado-valor"
           data-nombre="<%= item["nombre"] %>"

@@ -10,6 +10,16 @@ module ForecastHelper
     "#{(value.to_f * 100).round(1)}%"
   end
 
+  # Formatea un valor de OKR (meta o realizado) según su unidad: $ / % / cantidad plana.
+  def fmt_meta(valor, unidad)
+    return "—" if valor.nil? || valor == ""
+    case unidad
+    when "monto" then fmt(valor)
+    when "porcentaje" then "#{valor}%"
+    else valor.to_s
+    end
+  end
+
   def pct_badge_class(value)
     return "bg-gray-100 text-gray-500" if value.nil?
     if value >= 1
