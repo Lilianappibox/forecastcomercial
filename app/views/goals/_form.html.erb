@@ -73,10 +73,12 @@
   function rowToObj(row) {
     return {
       nombre: row.querySelector(".okr-nombre").value,
-      // El campo se diligencia como número entero (30 = 30%); se guarda como fracción (0.30) para los cálculos.
+      // Participación y Tope se diligencian como número entero (30 = 30%); se guardan
+      // como fracción (0.30) para los cálculos.
       participacion: parseFloat(row.querySelector(".okr-participacion").value || "0") / 100,
       meta: parseFloat(row.querySelector(".okr-meta").value || "0"),
-      unidad: row.querySelector(".okr-unidad").value
+      unidad: row.querySelector(".okr-unidad").value,
+      tope: parseFloat(row.querySelector(".okr-tope").value || "100") / 100
     };
   }
 
@@ -98,6 +100,7 @@
       var clone = template.cloneNode(true);
       clone.querySelectorAll("input").forEach(function (input) { input.value = ""; });
       clone.querySelector(".okr-unidad").value = "cantidad";
+      clone.querySelector(".okr-tope").value = "100";
       rowsContainer.appendChild(clone);
     });
 

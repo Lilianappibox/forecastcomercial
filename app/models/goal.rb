@@ -18,12 +18,12 @@ class Goal < ApplicationRecord
     OneOnOneEntry.find_by(user_id: user_id, year: year, month: month)
   end
 
-  # Cruza los OKR asignados (meta, participación) con lo "realizado" que el KAM
+  # Cruza los OKR asignados (meta, participación, tope) con lo "realizado" que el KAM
   # diligencia en su 1:1 (OneOnOneEntry#okr_gestion_real / #okr_asistencia_real),
   # por "nombre". Devuelve un array de filas listas para tabla: nombre, participación,
-  # meta, realizado, cumplimiento (avance del ítem, tope 100%) y ponderado (lo que
-  # ese ítem aporta al total: cumplimiento × participación — la suma de "ponderado"
-  # de todas las filas da el "Total cumplimiento OKR").
+  # meta, realizado, cumplimiento (avance del ítem, limitado por su tope — 100% si no
+  # se definió uno distinto) y ponderado (lo que ese ítem aporta al total: cumplimiento
+  # × participación — la suma de "ponderado" de todas las filas da el "Total cumplimiento OKR").
   def okr_rows(tipo, realizados)
     items = tipo == :gestion ? okr_gestion : okr_asistencia
     realizados_por_nombre = (realizados || []).index_by { |r| r["nombre"] }
@@ -33,15 +33,21 @@ class Goal < ApplicationRecord
       realizado_item = realizados_por_nombre[item["nombre"]]
       realizado_valor = realizado_item&.dig("realizado")
       participacion = item["participacion"].to_f
-      cumplimiento = meta_valor.zero? || realizado_valor.nil? ? nil : [ realizado_valor.to_f / meta_valor, 1.0 ].min
+      tope = item["tope"].nil? ? 1.0 : item["tope"].to_f
+      cumplimiento = meta_valor.zero? || realizado_valor.nil? ? nil : [ realizado_valor.to_f / meta_valor, tope ].min
 
       {
         nombre: item["nombre"],
         participacion: participacion,
         meta: item["meta"],
         unidad: item["unidad"],
+        tope: tope,
         realizado: realizado_valor,
         cumplimiento: cumplimiento,
+        # Qué tanto del tope alcanzó (para el color del badge): 100% en cuanto llega
+        # al tope, aunque lo haya sobrepasado — el badge no debe verse "en rojo" solo
+        # porque el tope sea bajo.
+        avance: cumplimiento.nil? || tope.zero? ? nil : cumplimiento / tope,
         ponderado: cumplimiento.nil? ? nil : cumplimiento * participacion
       }
     end

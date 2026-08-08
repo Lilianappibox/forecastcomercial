@@ -160,21 +160,27 @@
   if (gmvInput) gmvInput.addEventListener("input", updateGmvCumplimiento);
 
   document.querySelectorAll(".realizado-editor").forEach(function (editor) {
-    // Cumplimiento del ítem, con tope de 100% (no deja que un OKR sobre-cumplido
-    // infle el total). "Ponderado" es lo que ese ítem aporta al total: cumplimiento × participación.
+    // Cumplimiento del ítem, con el tope configurado para ese OKR (100% si no se
+    // definió uno distinto) — evita que un OKR sobre-cumplido infle el total.
+    // "Ponderado" es lo que ese ítem aporta al total: cumplimiento × participación.
     function cumplimientoDe(row) {
       var meta = parseFloat(row.dataset.meta || "0");
+      var tope = row.dataset.tope !== undefined ? parseFloat(row.dataset.tope) : 1;
       var input = row.querySelector(".realizado-valor");
       if (!(meta > 0) || input.value === "") return null;
       var real = parseFloat(input.value);
-      return Math.min(real / meta, 1);
+      return Math.min(real / meta, tope);
     }
 
     function updateRow(row) {
       var cumplimiento = cumplimientoDe(row);
       var participacion = parseFloat(row.dataset.participacion || "0");
+      var tope = row.dataset.tope !== undefined ? parseFloat(row.dataset.tope) : 1;
       var ponderado = cumplimiento === null ? null : cumplimiento * participacion;
-      applyBadge(row.querySelector(".cumplimiento-valor"), ponderado, "", cumplimiento);
+      // El color refleja qué tanto del tope se alcanzó, no el número ponderado
+      // (un OKR con tope bajo que sí lo alcanzó no debe verse en rojo).
+      var avance = (cumplimiento === null || !(tope > 0)) ? null : cumplimiento / tope;
+      applyBadge(row.querySelector(".cumplimiento-valor"), ponderado, "", avance);
     }
 
     function updateTotal() {
