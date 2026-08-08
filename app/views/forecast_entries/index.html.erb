@@ -32,6 +32,7 @@
             <th class="text-right px-4 py-3">Utilidad esperada</th>
             <th class="text-right px-4 py-3">Utilidad alcanzada</th>
             <th class="text-right px-4 py-3">% OKR Gestión</th>
+            <th class="text-right px-4 py-3">% OKR Asistencia</th>
             <th class="text-right px-4 py-3">Acción</th>
           </tr>
         </thead>
@@ -58,6 +59,10 @@
               <td class="px-4 py-3 text-right">
                 <% okr = one_on_one&.cumplimiento_okr_gestion %>
                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(okr) %>"><%= fmt_pct(okr) %></span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <% okr_asistencia = one_on_one&.cumplimiento_okr_asistencia %>
+                <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(okr_asistencia) %>"><%= fmt_pct(okr_asistencia) %></span>
               </td>
               <td class="px-4 py-3 text-right">
                 <% if one_on_one %>
