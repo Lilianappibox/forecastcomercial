@@ -13,4 +13,8 @@ class OneOnOneEntry < ApplicationRecord
   def seccion(nombre)
     (data || {})[nombre.to_s]
   end
+
+  def goal
+    @goal ||= Goal.find_by(user_id: user_id, year: year, month: month)
+  end
 end

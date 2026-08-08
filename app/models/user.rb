@@ -1,5 +1,6 @@
 class User < ApplicationRecord
   has_secure_password
+  has_one_attached :foto
 
   ROLES = { KAM: "KAM", ADMIN: "Administrativo" }.freeze
 

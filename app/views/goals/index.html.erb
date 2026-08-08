@@ -46,6 +46,7 @@
               <td class="px-4 py-3 text-right"><%= fmt(goal.gmv_meta) %></td>
               <td class="px-4 py-3 text-right text-gray-600"><%= fmt(goal.income_esperado) %></td>
               <td class="px-4 py-3 text-right space-x-3 whitespace-nowrap">
+                <%= link_to "📊 Seguimiento", goal_path(goal), class: "text-purple-600 hover:underline" %>
                 <%= link_to "🖼️ Imagen", image_goal_path(goal), class: "text-purple-600 hover:underline" %>
                 <%= link_to "✏️ Editar", edit_goal_path(goal), class: "text-blue-600 hover:underline" %>
                 <%= button_to "🗑️", goal, method: :delete,

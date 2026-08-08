@@ -29,12 +29,9 @@
     <%= f.number_field :gmv_real, step: "1", class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
   </div>
 
-  <% if goal %>
-    <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
-      <%= render "forecast_entries/realizado_table", field_name: "okr_gestion_real", meta_items: goal.okr_gestion, realizados: entry.okr_gestion_real, titulo: "🎯 OKR Gestión — realizado" %>
-    </div>
-    <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
-      <%= render "forecast_entries/realizado_table", field_name: "okr_asistencia_real", meta_items: goal.okr_asistencia, realizados: entry.okr_asistencia_real, titulo: "📋 OKR Asistencia — realizado" %>
+  <% if goal&.okr_gestion.present? || goal&.okr_asistencia.present? %>
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700">
+      El avance de tus OKR (gestión y asistencia) se diligencia en tu <%= link_to "1:1 de #{mes_nombre(entry.month)}", entrar_one_on_ones_path(year: entry.year, month: entry.month, user_id: entry.user_id), class: "underline font-semibold" %>.
     </div>
   <% end %>
 
@@ -50,23 +47,3 @@
     <%= link_to "Cancelar", forecast_entries_path, class: "px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium" %>
   </div>
 <% end %>
-
-<script>
-(function () {
-  function serialize(editor) {
-    var rows = editor.querySelectorAll(".realizado-valor");
-    var items = [];
-    rows.forEach(function (input) {
-      items.push({ nombre: input.dataset.nombre, realizado: parseFloat(input.value || "0") });
-    });
-    editor.querySelector(".realizado-json-input").value = JSON.stringify(items);
-  }
-
-  var form = document.getElementById("forecast-form");
-  if (form) {
-    form.addEventListener("submit", function () {
-      document.querySelectorAll(".realizado-editor").forEach(serialize);
-    });
-  }
-})();
-</script>

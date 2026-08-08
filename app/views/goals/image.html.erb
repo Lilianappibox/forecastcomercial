@@ -7,12 +7,25 @@
 
   <div id="meta-card" class="rounded-2xl overflow-hidden shadow-xl" style="background: #ffffff; font-family: Arial, sans-serif;">
     <div class="p-6 text-white" style="background: linear-gradient(135deg, #5B17A8 0%, #7C22D4 50%, #C026D3 100%)">
-      <div class="inline-block bg-white rounded-lg px-3 py-2 mb-4">
+      <div class="inline-block bg-white rounded-lg px-3 py-2 mb-5">
         <%= image_tag "pibox-logo.png", alt: "Pibox", style: "height: 24px; display: block;" %>
       </div>
-      <p class="text-sm opacity-90">Meta comercial</p>
-      <h1 class="text-2xl font-bold"><%= @goal.user.nombre %></h1>
-      <p class="text-sm opacity-90"><%= mes_nombre(@goal.month) %> <%= @goal.year %></p>
+
+      <div class="flex items-center">
+        <div class="bg-white rounded-full pl-5 pr-9 py-3 -mr-6" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <p class="text-lg font-bold" style="color: #5B17A8;"><%= @goal.user.nombre %></p>
+          <% if @goal.user.cargo.present? %>
+            <p class="text-xs text-gray-500"><%= @goal.user.cargo %></p>
+          <% end %>
+        </div>
+        <% if @goal.user.foto.attached? %>
+          <%= image_tag @goal.user.foto, class: "w-16 h-16 rounded-full object-cover shrink-0", style: "border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" %>
+        <% else %>
+          <div class="w-16 h-16 rounded-full bg-white/20 border-2 border-white flex items-center justify-center text-xl font-bold shrink-0"><%= @goal.user.initial %></div>
+        <% end %>
+      </div>
+
+      <p class="text-sm opacity-90 mt-4">Meta comercial · <%= mes_nombre(@goal.month) %> <%= @goal.year %></p>
     </div>
 
     <div class="p-6 space-y-6">

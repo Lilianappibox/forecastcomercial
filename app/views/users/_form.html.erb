@@ -1,5 +1,5 @@
 <%# Locals: user, permisos_configurables %>
-<%= form_with model: user, class: "space-y-6" do |f| %>
+<%= form_with model: user, multipart: true, class: "space-y-6" do |f| %>
   <% if user.errors.any? %>
     <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
       <p class="font-semibold mb-2">Por favor corrige los siguientes errores:</p>
@@ -10,6 +10,18 @@
       </ul>
     </div>
   <% end %>
+
+  <div>
+    <label class="text-xs font-semibold text-gray-600 mb-1 block">Foto</label>
+    <div class="flex items-center gap-4">
+      <% if user.foto.attached? %>
+        <%= image_tag user.foto, class: "w-16 h-16 rounded-full object-cover border border-gray-200" %>
+      <% else %>
+        <div class="w-16 h-16 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400 text-xl font-bold"><%= user.initial %></div>
+      <% end %>
+      <%= f.file_field :foto, accept: "image/*", class: "text-sm text-gray-600" %>
+    </div>
+  </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div>

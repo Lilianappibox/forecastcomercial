@@ -62,17 +62,7 @@ class ForecastEntriesController < ApplicationController
   end
 
   def entry_params
-    attrs = params.require(:forecast_entry).permit(
-      :user_id, :year, :month, :gmv_real, :notas,
-      :okr_gestion_real, :okr_asistencia_real
-    )
-    attrs[:okr_gestion_real] = parse_json(attrs[:okr_gestion_real]) if attrs.key?(:okr_gestion_real)
-    attrs[:okr_asistencia_real] = parse_json(attrs[:okr_asistencia_real]) if attrs.key?(:okr_asistencia_real)
-    attrs
-  end
-
-  def parse_json(raw)
-    raw.is_a?(String) ? (JSON.parse(raw) rescue []) : raw
+    params.require(:forecast_entry).permit(:user_id, :year, :month, :gmv_real, :notas)
   end
 
   def mes_nombre(numero)

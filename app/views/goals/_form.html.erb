@@ -34,11 +34,16 @@
     </div>
     <div>
       <label class="text-xs font-semibold text-gray-600 mb-1 block">Meta GMV *</label>
-      <%= f.number_field :gmv_meta, step: "1", class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
+      <%= f.number_field :gmv_meta, step: "1", id: "gmv_meta_input", class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
     </div>
     <div>
       <label class="text-xs font-semibold text-gray-600 mb-1 block">Income esperado %</label>
-      <%= f.number_field :income_pct, step: "0.01", class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
+      <%= f.number_field :income_pct, step: "0.01", id: "income_pct_input", class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" %>
+    </div>
+    <div>
+      <label class="text-xs font-semibold text-gray-600 mb-1 block">Income esperado $</label>
+      <input type="text" id="income_pct_calculado" readonly value="<%= fmt(goal.income_esperado) %>"
+        class="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-600">
     </div>
   </div>
 
@@ -108,5 +113,20 @@
       document.querySelectorAll(".okr-editor").forEach(serialize);
     });
   }
+
+  function fmtMoney(n) {
+    if (!isFinite(n) || n === 0) return "N.A";
+    return "$" + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  function updateIncomeCalculado() {
+    var gmv = parseFloat(document.getElementById("gmv_meta_input").value || "0");
+    var pct = parseFloat(document.getElementById("income_pct_input").value || "0");
+    document.getElementById("income_pct_calculado").value = fmtMoney(gmv * pct);
+  }
+
+  [ "gmv_meta_input", "income_pct_input" ].forEach(function (id) {
+    document.getElementById(id).addEventListener("input", updateIncomeCalculado);
+  });
 })();
 </script>

@@ -1,0 +1,76 @@
+<% content_for :title, "Seguimiento — #{@goal.user.nombre}" %>
+<% one_on_one = @goal.one_on_one_entry %>
+<div class="max-w-4xl mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-xl font-bold text-gray-800">📊 Seguimiento — <%= @goal.user.nombre %></h1>
+      <p class="text-sm text-gray-500"><%= mes_nombre(@goal.month) %> <%= @goal.year %></p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "✏️ Editar meta", edit_goal_path(@goal), class: "px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium" %>
+      <%= link_to "← Volver", goals_path, class: "px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 mb-6">
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <p class="text-xs text-gray-500 font-semibold mb-1">GMV Meta</p>
+      <p class="text-xl font-bold text-gray-800"><%= fmt(@goal.gmv_meta) %></p>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <p class="text-xs text-gray-500 font-semibold mb-1">Income esperado (<%= fmt_pct(@goal.income_pct) %>)</p>
+      <p class="text-xl font-bold text-gray-800"><%= fmt(@goal.income_esperado) %></p>
+    </div>
+  </div>
+
+  <% if one_on_one.nil? %>
+    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-700 mb-6">
+      <%= @goal.user.nombre %> todavía no ha diligenciado su 1:1 de <%= mes_nombre(@goal.month) %> — ahí es donde se reporta el "Realizado" de cada OKR.
+    </div>
+  <% else %>
+    <div class="flex justify-end mb-2">
+      <%= link_to "🧑‍💼 Ver 1:1 de #{mes_nombre(@goal.month)}", edit_one_on_one_path(one_on_one), class: "text-xs text-purple-600 hover:underline" %>
+    </div>
+  <% end %>
+
+  <% [ [ :gestion, "🎯 OKR Gestión", @goal.okr_gestion ], [ :asistencia, "📋 OKR Asistencia", @goal.okr_asistencia ] ].each do |tipo, titulo, items| %>
+    <% next if items.blank? %>
+    <% rows = @goal.okr_rows(tipo, tipo == :gestion ? one_on_one&.okr_gestion_real : one_on_one&.okr_asistencia_real) %>
+    <% total = @goal.total_ponderado(tipo, tipo == :gestion ? one_on_one&.okr_gestion_real : one_on_one&.okr_asistencia_real) %>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden mb-6">
+      <h3 class="text-sm font-semibold text-gray-700 px-4 py-3 border-b border-gray-100"><%= titulo %></h3>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+          <tr>
+            <th class="text-right px-3 py-2">Participación</th>
+            <th class="text-left px-3 py-2">OKR'S</th>
+            <th class="text-right px-3 py-2">Meta</th>
+            <th class="text-right px-3 py-2">Realizadas</th>
+            <th class="text-right px-3 py-2">Cumplimiento</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% rows.each do |row| %>
+            <tr>
+              <td class="px-3 py-2 text-right text-gray-600"><%= fmt_pct(row[:participacion]) %></td>
+              <td class="px-3 py-2 text-gray-700"><%= row[:nombre] %></td>
+              <td class="px-3 py-2 text-right text-gray-600"><%= row[:meta] %></td>
+              <td class="px-3 py-2 text-right text-gray-600"><%= row[:realizado] || "—" %></td>
+              <td class="px-3 py-2 text-right">
+                <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(row[:cumplimiento]) %>"><%= fmt_pct(row[:cumplimiento]) %></span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+        <tfoot>
+          <tr class="bg-gray-50 font-semibold">
+            <td class="px-3 py-2" colspan="4">Total cumplimiento OKR</td>
+            <td class="px-3 py-2 text-right">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(total) %>"><%= fmt_pct(total) %></span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  <% end %>
+</div>

@@ -17,6 +17,19 @@
 
     <input type="hidden" name="one_on_one_entry[data]" id="data-json-input">
 
+    <% if @entry.goal.nil? %>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-xs text-yellow-700">
+        No hay meta asignada para este mes todavía, así que no se pueden diligenciar los OKR.
+      </div>
+    <% else %>
+      <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+        <%= render "realizado_table", field_name: "okr_gestion_real", meta_items: @entry.goal.okr_gestion, realizados: @entry.okr_gestion_real, titulo: "🎯 OKR Gestión — realizado" %>
+      </div>
+      <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+        <%= render "realizado_table", field_name: "okr_asistencia_real", meta_items: @entry.goal.okr_asistencia, realizados: @entry.okr_asistencia_real, titulo: "📋 OKR Asistencia — realizado" %>
+      </div>
+    <% end %>
+
     <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
       <%= render "scalar_group", field_name: "prospeccion", titulo: "🔍 Prospección",
           values: @entry.seccion(:prospeccion),
@@ -133,10 +146,19 @@
     return data;
   }
 
+  function serializeRealizado(editor) {
+    var items = [];
+    editor.querySelectorAll(".realizado-valor").forEach(function (input) {
+      if (input.value !== "") items.push({ nombre: input.dataset.nombre, realizado: parseFloat(input.value) });
+    });
+    editor.querySelector(".realizado-json-input").value = JSON.stringify(items);
+  }
+
   var form = document.getElementById("oo-form");
   if (form) {
     form.addEventListener("submit", function () {
       document.getElementById("data-json-input").value = JSON.stringify(buildData());
+      document.querySelectorAll(".realizado-editor").forEach(serializeRealizado);
     });
   }
 })();

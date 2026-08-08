@@ -48,9 +48,17 @@ class OneOnOnesController < ApplicationController
   end
 
   def entry_params
-    attrs = params.require(:one_on_one_entry).permit(:data, :puntos_fuertes, :puntos_mejora)
-    attrs[:data] = attrs[:data].is_a?(String) ? (JSON.parse(attrs[:data]) rescue {}) : attrs[:data] if attrs.key?(:data)
+    attrs = params.require(:one_on_one_entry).permit(
+      :data, :puntos_fuertes, :puntos_mejora, :okr_gestion_real, :okr_asistencia_real
+    )
+    attrs[:data] = parse_json(attrs[:data], {}) if attrs.key?(:data)
+    attrs[:okr_gestion_real] = parse_json(attrs[:okr_gestion_real], []) if attrs.key?(:okr_gestion_real)
+    attrs[:okr_asistencia_real] = parse_json(attrs[:okr_asistencia_real], []) if attrs.key?(:okr_asistencia_real)
     attrs
+  end
+
+  def parse_json(raw, fallback)
+    raw.is_a?(String) ? (JSON.parse(raw) rescue fallback) : raw
   end
 
   def mes_nombre(numero)

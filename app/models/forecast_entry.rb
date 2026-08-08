@@ -40,31 +40,19 @@ class ForecastEntry < ApplicationRecord
     (gmv_real.to_f - anterior) / anterior
   end
 
-  # Cumplimiento OKR ponderado: cruza okr_gestion_real (lo diligenciado por el KAM)
-  # con Goal#okr_gestion (participación y meta asignados por el líder) por "nombre".
+  def one_on_one_entry
+    @one_on_one_entry ||= OneOnOneEntry.find_by(user_id: user_id, year: year, month: month)
+  end
+
+  # Cumplimiento OKR ponderado: el "realizado" lo diligencia el KAM en su 1:1
+  # (OneOnOneEntry), cruzado con Goal#okr_gestion (meta y participación).
   def cumplimiento_okr_gestion
-    ponderado_de(okr_gestion_real, goal&.okr_gestion)
+    return nil if goal&.okr_gestion.blank?
+    goal.total_ponderado(:gestion, one_on_one_entry&.okr_gestion_real)
   end
 
   def cumplimiento_okr_asistencia
-    ponderado_de(okr_asistencia_real, goal&.okr_asistencia)
-  end
-
-  private
-
-  def ponderado_de(realizados, metas)
-    return nil if metas.blank?
-    metas_por_nombre = metas.index_by { |item| item["nombre"] }
-    realizados_por_nombre = (realizados || []).index_by { |item| item["nombre"] }
-
-    metas.sum do |item|
-      nombre = item["nombre"]
-      participacion = item["participacion"].to_f
-      meta_valor = item["meta"].to_f
-      realizado_valor = realizados_por_nombre[nombre]&.dig("realizado").to_f
-      next 0 if meta_valor.zero?
-
-      participacion * (realizado_valor / meta_valor)
-    end
+    return nil if goal&.okr_asistencia.blank?
+    goal.total_ponderado(:asistencia, one_on_one_entry&.okr_asistencia_real)
   end
 end
