@@ -1,7 +1,8 @@
 <% content_for :title, "1:1 — #{@entry.user.nombre}" %>
 <div class="max-w-4xl mx-auto px-4 py-6">
-  <div class="flex justify-end mb-4">
-    <%= link_to "← Historial", one_on_ones_path, class: "text-sm text-blue-600 hover:underline" %>
+  <div class="flex justify-end gap-3 mb-4 no-print">
+    <button type="button" onclick="window.print()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">🖨️ Descargar PDF</button>
+    <%= link_to "← Historial", one_on_ones_path, class: "text-sm text-blue-600 hover:underline self-center" %>
   </div>
 
   <div class="rounded-2xl overflow-hidden shadow-xl mb-6 p-6 text-white" style="background: linear-gradient(135deg, #5B17A8 0%, #7C22D4 50%, #C026D3 100%);">
@@ -137,12 +138,25 @@
       </div>
     </div>
 
-    <div class="flex gap-3">
+    <div class="flex gap-3 no-print">
       <%= f.submit "Guardar 1:1", class: "px-6 py-2 text-white rounded-lg text-sm font-semibold cursor-pointer hover:opacity-90", style: "background: linear-gradient(135deg, #5B17A8, #C026D3)" %>
       <%= link_to "Cancelar", one_on_ones_path, class: "px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium" %>
     </div>
   <% end %>
 </div>
+
+<style>
+  @media print {
+    #sidebar { display: none !important; }
+    main { margin-left: 0 !important; }
+    .no-print, .dyn-add-row, .dyn-remove-row { display: none !important; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .bg-white.shadow-sm.rounded-xl.border.border-gray-100,
+    .bg-purple-50.border.border-purple-100.rounded-xl {
+      break-inside: avoid;
+    }
+  }
+</style>
 
 <script>
 (function () {
