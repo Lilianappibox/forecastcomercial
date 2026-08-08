@@ -1,8 +1,29 @@
 <% content_for :title, "1:1 — #{@entry.user.nombre}" %>
 <div class="max-w-4xl mx-auto px-4 py-6">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-xl font-bold text-gray-800">🧑‍💼 1:1 — <%= @entry.user.nombre %> · <%= mes_nombre(@entry.month) %> <%= @entry.year %></h1>
+  <div class="flex justify-end mb-4">
     <%= link_to "← Historial", one_on_ones_path, class: "text-sm text-blue-600 hover:underline" %>
+  </div>
+
+  <div class="rounded-2xl overflow-hidden shadow-xl mb-6 p-6 text-white" style="background: linear-gradient(135deg, #5B17A8 0%, #7C22D4 50%, #C026D3 100%);">
+    <div class="flex items-center gap-4">
+      <%= image_tag "pibox-logo-blanco.png", alt: "Pibox", style: "height: 40px; display: block; flex-shrink: 0;" %>
+
+      <div class="flex items-center justify-center flex-1">
+        <div class="bg-white rounded-full pl-5 pr-11 py-3 -mr-8" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <p class="text-lg font-bold" style="color: #5B17A8;"><%= @entry.user.nombre %></p>
+          <% if @entry.user.cargo.present? %>
+            <p class="text-xs text-gray-500"><%= @entry.user.cargo %></p>
+          <% end %>
+        </div>
+        <% if @entry.user.foto.attached? %>
+          <%= image_tag @entry.user.foto, class: "w-20 h-20 rounded-full object-cover shrink-0", style: "border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" %>
+        <% else %>
+          <div class="w-20 h-20 rounded-full bg-white/20 border-2 border-white flex items-center justify-center text-xl font-bold shrink-0"><%= @entry.user.initial %></div>
+        <% end %>
+      </div>
+    </div>
+
+    <p class="text-sm opacity-90 mt-4">🧑‍💼 1:1 · <%= mes_nombre(@entry.month) %> <%= @entry.year %></p>
   </div>
 
   <%= form_with model: @entry, url: one_on_one_path(@entry), method: :patch, class: "space-y-6", id: "oo-form" do |f| %>
