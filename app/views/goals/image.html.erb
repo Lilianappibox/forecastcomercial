@@ -8,9 +8,9 @@
   <div id="meta-card" class="rounded-2xl overflow-hidden shadow-xl" style="background: #ffffff; font-family: Arial, sans-serif;">
     <div class="p-6 text-white" style="background: linear-gradient(135deg, #5B17A8 0%, #7C22D4 50%, #C026D3 100%)">
       <div class="flex items-center gap-4">
-        <%= image_tag "pibox-logo-blanco.png", alt: "Pibox", style: "height: 30px; display: block; flex-shrink: 0;" %>
+        <%= image_tag "pibox-logo-blanco.png", alt: "Pibox", style: "height: 44px; display: block; flex-shrink: 0;" %>
 
-        <div class="flex items-center flex-1">
+        <div class="flex items-center justify-center flex-1">
           <div class="bg-white rounded-full pl-5 pr-11 py-3 -mr-8" style="box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
             <p class="text-lg font-bold" style="color: #5B17A8;"><%= @goal.user.nombre %></p>
             <% if @goal.user.cargo.present? %>
