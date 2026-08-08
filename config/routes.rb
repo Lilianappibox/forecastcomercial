@@ -17,7 +17,7 @@ Rails.application.routes.draw do
   resources :one_on_ones, path: "uno_a_uno", only: [ :index, :show, :edit, :update ] do
     collection { get :entrar; get :evolucion }
   end
-  resources :clientes
+  resources :cliente_archivos, path: "clientes", as: "clientes", only: [ :index, :show, :create, :destroy ]
 
   root "dashboard#index"
 end

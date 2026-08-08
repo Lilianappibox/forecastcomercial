@@ -1,0 +1,120 @@
+<% content_for :title, "Clientes — #{@archivo.user.nombre}" %>
+<div class="max-w-5xl mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-xl font-bold text-gray-800">🤝 Clientes — <%= @archivo.user.nombre %></h1>
+      <p class="text-sm text-gray-500"><%= mes_nombre(@archivo.month) %> <%= @archivo.year %> · <%= @archivo.nombre_archivo %></p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "← Historial", clientes_path(kam_id: @archivo.user_id), class: "px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium" %>
+      <% if @puede_eliminar %>
+        <%= button_to "🗑️ Eliminar", cliente_path(@archivo), method: :delete,
+            data: { turbo_confirm: "¿Eliminar el archivo de #{mes_nombre(@archivo.month)} #{@archivo.year}?" },
+            class: "px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-medium border-0 cursor-pointer" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <p class="text-xs text-gray-500 font-semibold mb-1"># Clientes</p>
+      <p class="text-xl font-bold text-gray-800"><%= @filas.size %></p>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <p class="text-xs text-gray-500 font-semibold mb-1">GMV total</p>
+      <p class="text-xl font-bold text-gray-800"><%= fmt(@archivo.total_gmv) %></p>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <p class="text-xs text-gray-500 font-semibold mb-1">Utilidad bruta</p>
+      <p class="text-xl font-bold text-gray-800"><%= fmt(@archivo.total_utilidad) %></p>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <p class="text-xs text-gray-500 font-semibold mb-1">% Utilidad</p>
+      <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(@archivo.pct_utilidad_total) %>"><%= fmt_pct(@archivo.pct_utilidad_total) %></span>
+    </div>
+  </div>
+
+  <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4 mb-6">
+    <h3 class="text-sm font-semibold text-gray-700 mb-3">📊 Categorización por GMV</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <% @categorias.each do |cat| %>
+        <div class="border border-gray-100 rounded-lg p-3">
+          <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= categoria_badge_class(cat[:id]) %>"><%= cat[:label] %></span>
+          <p class="text-lg font-bold text-gray-800 mt-2"><%= cat[:count] %> clientes</p>
+          <p class="text-xs text-gray-500"><%= fmt(cat[:gmv_total]) %></p>
+        </div>
+      <% end %>
+    </div>
+    <p class="text-xs text-gray-400 mt-3">Big Sale &gt; $10.000.000 · Growth $5.000.000–$10.000.000 · Pyme $2.000.000–$5.000.000 · Vaivén &lt; $2.000.000</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">🆕 Clientes nuevos (<%= @nuevos.size %>)</h3>
+      <% if @nuevos.empty? %>
+        <p class="text-xs text-gray-400">Ninguno este mes.</p>
+      <% else %>
+        <div class="flex flex-wrap gap-2">
+          <% @nuevos.each do |cliente| %>
+            <span class="px-2 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700"><%= cliente %></span>
+          <% end %>
+        </div>
+      <% end %>
+      <p class="text-xs text-gray-400 mt-2">Facturan este mes y no tuvieron GMV (con ningún KAM) en los 3 meses anteriores.</p>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">⚠️ Clientes perdidos (<%= @perdidos.size %>)</h3>
+      <% if @perdidos.empty? %>
+        <p class="text-xs text-gray-400">Ninguno este mes.</p>
+      <% else %>
+        <div class="flex flex-wrap gap-2">
+          <% @perdidos.each do |cliente| %>
+            <span class="px-2 py-1 rounded-lg text-xs font-medium bg-red-50 text-red-700"><%= cliente %></span>
+          <% end %>
+        </div>
+      <% end %>
+      <p class="text-xs text-gray-400 mt-2">Tenían GMV (con cualquier KAM) el mes anterior y no facturan nada este mes.</p>
+    </div>
+  </div>
+
+  <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+        <tr>
+          <th class="text-left px-4 py-3">Cliente</th>
+          <th class="text-right px-4 py-3">GMV</th>
+          <th class="text-right px-4 py-3">Utilidad</th>
+          <th class="text-right px-4 py-3">% Utilidad</th>
+          <th class="text-left px-4 py-3">Categoría</th>
+          <th class="text-right px-4 py-3">GMV mes anterior</th>
+          <th class="text-right px-4 py-3">Crecimiento</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @filas.each do |f| %>
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium text-gray-800"><%= f[:cliente] %></td>
+            <td class="px-4 py-3 text-right text-gray-600"><%= fmt(f[:gmv]) %></td>
+            <td class="px-4 py-3 text-right text-gray-600"><%= fmt(f[:utilidad]) %></td>
+            <td class="px-4 py-3 text-right">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(f[:pct_utilidad]) %>"><%= fmt_pct(f[:pct_utilidad]) %></span>
+            </td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= categoria_badge_class(f[:categoria]) %>">
+                <%= ClienteArchivo::CATEGORIAS.find { |c| c[:id] == f[:categoria] }[:label] %>
+              </span>
+            </td>
+            <td class="px-4 py-3 text-right text-gray-500"><%= f[:gmv_anterior] ? fmt(f[:gmv_anterior]) : "—" %></td>
+            <td class="px-4 py-3 text-right">
+              <% if f[:crecimiento_pct].nil? %>
+                <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">—</span>
+              <% else %>
+                <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= signo_badge_class(f[:crecimiento]) %>"><%= fmt_signed_pct(f[:crecimiento_pct]) %></span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

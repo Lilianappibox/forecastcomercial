@@ -10,7 +10,7 @@ class DashboardController < ApplicationController
       @one_on_ones_count = OneOnOneEntry.where(year: @year, month: @month, user_id: @kams.select(:id)).count
       @gmv_diligenciado_count = OneOnOneEntry.where(year: @year, month: @month, user_id: @kams.select(:id)).where("gmv_real > 0").count
       @usuarios_activos = User.where(activo: true).count
-      @kams_con_clientes_count = Cliente.where(user_id: @kams.select(:id)).distinct.count(:user_id)
+      @kams_con_clientes_count = ClienteArchivo.where(year: @year, month: @month, user_id: @kams.select(:id)).distinct.count(:user_id)
 
       @evo_year = (params[:evo_year] || @year).to_i
       @evo_month = params[:evo_month].presence
@@ -20,7 +20,7 @@ class DashboardController < ApplicationController
     else
       @mi_goal = Goal.find_by(user_id: current_user.id, year: @year, month: @month)
       @mi_one_on_one = OneOnOneEntry.find_by(user_id: current_user.id, year: @year, month: @month)
-      @mis_clientes_count = Cliente.where(user_id: current_user.id).count
+      @mi_archivo_clientes = ClienteArchivo.find_by(user_id: current_user.id, year: @year, month: @month)
     end
   end
 end

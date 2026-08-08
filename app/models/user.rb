@@ -1,7 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
   has_one_attached :foto
-  has_many :clientes, dependent: :destroy
+  has_many :cliente_archivos, dependent: :destroy
 
   ROLES = { KAM: "KAM", ADMIN: "Administrativo" }.freeze
 

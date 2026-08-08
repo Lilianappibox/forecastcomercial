@@ -71,7 +71,7 @@
           <div class="dash-card-inner" style="background: linear-gradient(135deg, #0d9488, #2dd4bf);">
             <span class="dash-icon">🤝</span>
             <h3 class="dash-title">Clientes</h3>
-            <p class="dash-stat"><%= @kams_con_clientes_count %> / <%= @total_kams %> KAM con clientes cargados</p>
+            <p class="dash-stat"><%= @kams_con_clientes_count %> / <%= @total_kams %> KAM con archivo cargado</p>
             <div class="dash-progress"><div class="dash-progress-fill" style="width: <%= (pct * 100).round %>%;"></div></div>
           </div>
         <% end %>
@@ -80,7 +80,7 @@
           <div class="dash-card-inner" style="background: linear-gradient(135deg, #0d9488, #2dd4bf);">
             <span class="dash-icon">🤝</span>
             <h3 class="dash-title">Clientes</h3>
-            <p class="dash-stat"><%= @mis_clientes_count %> clientes en tu cartera</p>
+            <p class="dash-stat"><%= @mi_archivo_clientes ? "✓ Archivo cargado este mes" : "Pendiente este mes" %></p>
           </div>
         <% end %>
       <% end %>
