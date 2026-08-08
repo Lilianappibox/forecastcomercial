@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   resources :forecast_entries, path: "forecast", only: [ :index ]
   resources :one_on_ones, path: "uno_a_uno", only: [ :index, :show, :edit, :update ] do
     collection { get :entrar; get :evolucion }
+    member { patch :guardar_en_historial }
   end
   resources :cliente_archivos, path: "clientes", as: "clientes", only: [ :index, :show, :create, :destroy ]
 

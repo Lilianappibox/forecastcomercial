@@ -1,6 +1,6 @@
 class OneOnOnesController < ApplicationController
   before_action :check_permiso
-  before_action :set_entry, only: [ :show, :edit, :update ]
+  before_action :set_entry, only: [ :show, :edit, :update, :guardar_en_historial ]
 
   def index
     if current_user.admin?
@@ -41,6 +41,26 @@ class OneOnOnesController < ApplicationController
       redirect_to edit_one_on_one_path(@entry), notice: "✓ 1:1 guardado — #{mes_nombre(@entry.month)} #{@entry.year}"
     else
       render :edit, status: :unprocessable_entity
+    end
+  end
+
+  # Guarda lo diligenciado en la hoja bajo el mes/año que elija el KAM en el
+  # diálogo de confirmación, en vez del mes del registro que se estaba
+  # editando — permite archivar los mismos resultados en el mes que
+  # corresponda sin depender de por cuál entrada se haya entrado a la hoja.
+  def guardar_en_historial
+    target_year = params[:target_year].presence&.to_i
+    target_month = params[:target_month].presence&.to_i
+
+    if target_year.blank? || target_month.blank? || !(1..12).cover?(target_month)
+      redirect_to edit_one_on_one_path(@entry), alert: "Selecciona un mes y año válidos." and return
+    end
+
+    destino = OneOnOneEntry.find_or_initialize_by(user_id: @entry.user_id, year: target_year, month: target_month)
+    if destino.update(entry_params)
+      redirect_to one_on_ones_path, notice: "✓ Guardado en el historial — #{mes_nombre(target_month)} #{target_year}"
+    else
+      redirect_to edit_one_on_one_path(@entry), alert: destino.errors.full_messages.to_sentence
     end
   end
 
