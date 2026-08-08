@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_08_005059) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_08_013119) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,18 +42,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_08_005059) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
-  create_table "forecast_entries", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.decimal "gmv_real", default: "0.0", null: false
-    t.integer "month", null: false
-    t.text "notas"
-    t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
-    t.integer "year", null: false
-    t.index ["user_id", "year", "month"], name: "index_forecast_entries_on_user_id_and_year_and_month", unique: true
-    t.index ["user_id"], name: "index_forecast_entries_on_user_id"
-  end
-
   create_table "goals", force: :cascade do |t|
     t.bigint "assigned_by_id", null: false
     t.text "comentarios"
@@ -74,7 +62,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_08_005059) do
   create_table "one_on_one_entries", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.jsonb "data", default: {}, null: false
+    t.decimal "gmv_real", default: "0.0", null: false
     t.integer "month", null: false
+    t.text "notas"
     t.jsonb "okr_asistencia_real", default: [], null: false
     t.jsonb "okr_gestion_real", default: [], null: false
     t.text "puntos_fuertes"
@@ -106,7 +96,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_08_005059) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "forecast_entries", "users"
   add_foreign_key "goals", "users"
   add_foreign_key "goals", "users", column: "assigned_by_id"
   add_foreign_key "one_on_one_entries", "users"

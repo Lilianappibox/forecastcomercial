@@ -49,7 +49,8 @@ class OneOnOnesController < ApplicationController
 
   def entry_params
     attrs = params.require(:one_on_one_entry).permit(
-      :data, :puntos_fuertes, :puntos_mejora, :okr_gestion_real, :okr_asistencia_real
+      :data, :puntos_fuertes, :puntos_mejora, :okr_gestion_real, :okr_asistencia_real,
+      :gmv_real, :notas
     )
     attrs[:data] = parse_json(attrs[:data], {}) if attrs.key?(:data)
     attrs[:okr_gestion_real] = parse_json(attrs[:okr_gestion_real], []) if attrs.key?(:okr_gestion_real)

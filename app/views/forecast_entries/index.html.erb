@@ -19,6 +19,8 @@
       <button type="submit" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">Filtrar</button>
     <% end %>
 
+    <p class="text-xs text-gray-400 mb-4">El GMV real y el avance de OKR los diligencia cada KAM desde su 1:1 mensual.</p>
+
     <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden overflow-x-auto">
       <table class="w-full text-sm">
         <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
@@ -36,26 +38,26 @@
         <tbody class="divide-y divide-gray-100">
           <% @kams.each do |kam| %>
             <% goal = @goals_by_user[kam.id] %>
-            <% entry = @entries_by_user[kam.id] %>
+            <% one_on_one = @one_on_ones_by_user[kam.id] %>
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3 font-medium text-gray-800"><%= kam.nombre %></td>
               <td class="px-4 py-3 text-right"><%= goal ? fmt(goal.gmv_meta) : "—" %></td>
-              <td class="px-4 py-3 text-right"><%= entry ? fmt(entry.gmv_real) : "—" %></td>
+              <td class="px-4 py-3 text-right"><%= one_on_one ? fmt(one_on_one.gmv_real) : "—" %></td>
               <td class="px-4 py-3 text-right">
-                <% cumplimiento = entry&.cumplimiento_gmv %>
+                <% cumplimiento = one_on_one&.cumplimiento_gmv %>
                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(cumplimiento) %>"><%= fmt_pct(cumplimiento) %></span>
               </td>
               <td class="px-4 py-3 text-right text-gray-600"><%= goal ? fmt(goal.income_esperado) : "—" %></td>
-              <td class="px-4 py-3 text-right text-gray-600"><%= entry ? fmt(entry.utilidad_alcanzada) : "—" %></td>
+              <td class="px-4 py-3 text-right text-gray-600"><%= one_on_one ? fmt(one_on_one.utilidad_alcanzada) : "—" %></td>
               <td class="px-4 py-3 text-right">
-                <% okr = entry&.cumplimiento_okr_gestion %>
+                <% okr = one_on_one&.cumplimiento_okr_gestion %>
                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(okr) %>"><%= fmt_pct(okr) %></span>
               </td>
               <td class="px-4 py-3 text-right">
-                <% if entry %>
-                  <%= link_to "✏️ Editar", edit_forecast_entry_path(entry), class: "text-blue-600 hover:underline text-xs" %>
+                <% if one_on_one %>
+                  <%= link_to "✏️ Editar 1:1", edit_one_on_one_path(one_on_one), class: "text-blue-600 hover:underline text-xs" %>
                 <% elsif goal %>
-                  <%= link_to "+ Diligenciar", new_forecast_entry_path(user_id: kam.id, year: @year, month: @month), class: "text-purple-600 hover:underline text-xs" %>
+                  <%= link_to "+ Diligenciar", entrar_one_on_ones_path(user_id: kam.id, year: @year, month: @month), class: "text-purple-600 hover:underline text-xs" %>
                 <% else %>
                   <span class="text-gray-300 text-xs">Sin meta</span>
                 <% end %>
@@ -69,9 +71,9 @@
     <% current_month_entry = @entries.find { |e| e.year == Date.current.year && e.month == Date.current.month } %>
     <div class="flex justify-end mb-4">
       <% if current_month_entry %>
-        <%= link_to "✏️ Editar Forecast de #{mes_nombre(Date.current.month)}", edit_forecast_entry_path(current_month_entry), class: "px-4 py-2 text-white rounded-lg text-sm font-semibold hover:opacity-90", style: "background: linear-gradient(135deg, #5B17A8, #C026D3)" %>
+        <%= link_to "✏️ Editar 1:1 de #{mes_nombre(Date.current.month)}", edit_one_on_one_path(current_month_entry), class: "px-4 py-2 text-white rounded-lg text-sm font-semibold hover:opacity-90", style: "background: linear-gradient(135deg, #5B17A8, #C026D3)" %>
       <% else %>
-        <%= link_to "+ Diligenciar #{mes_nombre(Date.current.month)}", new_forecast_entry_path(year: Date.current.year, month: Date.current.month), class: "px-4 py-2 text-white rounded-lg text-sm font-semibold hover:opacity-90", style: "background: linear-gradient(135deg, #5B17A8, #C026D3)" %>
+        <%= link_to "+ Diligenciar #{mes_nombre(Date.current.month)}", entrar_one_on_ones_path(year: Date.current.year, month: Date.current.month), class: "px-4 py-2 text-white rounded-lg text-sm font-semibold hover:opacity-90", style: "background: linear-gradient(135deg, #5B17A8, #C026D3)" %>
       <% end %>
     </div>
 
@@ -106,7 +108,7 @@
                 <td class="px-4 py-3 text-right text-gray-600"><%= entry.crecimiento_gmv ? fmt(entry.crecimiento_gmv) : "—" %></td>
                 <td class="px-4 py-3 text-right text-gray-600"><%= fmt_pct(entry.crecimiento_gmv_pct) %></td>
                 <td class="px-4 py-3 text-right">
-                  <%= link_to "✏️", edit_forecast_entry_path(entry), class: "text-blue-600 hover:underline text-xs" %>
+                  <%= link_to "✏️", edit_one_on_one_path(entry), class: "text-blue-600 hover:underline text-xs" %>
                 </td>
               </tr>
             <% end %>

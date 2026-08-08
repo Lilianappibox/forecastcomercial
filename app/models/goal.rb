@@ -14,10 +14,6 @@ class Goal < ApplicationRecord
     gmv_meta.to_f * income_pct.to_f
   end
 
-  def forecast_entry
-    ForecastEntry.find_by(user_id: user_id, year: year, month: month)
-  end
-
   def one_on_one_entry
     OneOnOneEntry.find_by(user_id: user_id, year: year, month: month)
   end
