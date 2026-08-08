@@ -86,6 +86,16 @@
       <% end %>
     <% end %>
 
+    <% if permisos["verInsights"] %>
+      <%= link_to insights_path, class: "dash-card" do %>
+        <div class="dash-card-inner" style="background: linear-gradient(135deg, #4338ca, #818cf8);">
+          <span class="dash-icon">🧠</span>
+          <h3 class="dash-title">Insights Equipo</h3>
+          <p class="dash-stat">Comparativo de desempeño por KAM</p>
+        </div>
+      <% end %>
+    <% end %>
+
     <% if current_user.admin? %>
       <%= link_to users_path, class: "dash-card" do %>
         <div class="dash-card-inner" style="background: linear-gradient(135deg, #d97706, #f59e0b);">

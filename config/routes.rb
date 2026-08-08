@@ -19,6 +19,7 @@ Rails.application.routes.draw do
     member { patch :guardar_en_historial }
   end
   resources :cliente_archivos, path: "clientes", as: "clientes", only: [ :index, :show, :create, :destroy ]
+  resources :insights, only: [ :index ]
 
   root "dashboard#index"
 end

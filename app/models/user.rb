@@ -8,11 +8,11 @@ class User < ApplicationRecord
   PERMISOS_BASE = {
     "KAM" => {
       "verForecast" => true, "gestionarMetas" => false, "ver1a1" => true, "gestionarUsuarios" => false,
-      "verClientes" => true, "gestionarClientes" => false
+      "verClientes" => true, "gestionarClientes" => false, "verInsights" => false
     },
     "Administrativo" => {
       "verForecast" => true, "gestionarMetas" => true, "ver1a1" => true, "gestionarUsuarios" => true,
-      "verClientes" => true, "gestionarClientes" => true
+      "verClientes" => true, "gestionarClientes" => true, "verInsights" => true
     }
   }.freeze
 

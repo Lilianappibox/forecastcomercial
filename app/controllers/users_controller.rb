@@ -7,7 +7,8 @@ class UsersController < ApplicationController
     { id: "gestionarMetas",    label: "Asignar Metas (líder comercial)" },
     { id: "ver1a1",            label: "Ver 1:1 KAM" },
     { id: "verClientes",       label: "Ver Clientes" },
-    { id: "gestionarClientes", label: "Gestionar Clientes (subir/eliminar archivos de cualquier KAM)" }
+    { id: "gestionarClientes", label: "Gestionar Clientes (subir/eliminar archivos de cualquier KAM)" },
+    { id: "verInsights",       label: "Ver Insights Equipo" }
   ].freeze
 
   def index

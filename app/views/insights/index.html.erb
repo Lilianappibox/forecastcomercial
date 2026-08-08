@@ -1,0 +1,239 @@
+<% content_for :title, "Insights Equipo" %>
+<div class="max-w-6xl mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-bold text-gray-800">🧠 Insights Equipo</h1>
+  </div>
+
+  <%= form_with url: insights_path, method: :get, class: "flex items-end gap-3 mb-6" do %>
+    <div>
+      <label class="text-xs font-semibold text-gray-600 mb-1 block">Mes</label>
+      <select name="month" onchange="this.form.requestSubmit()" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <% (1..12).each do |m| %>
+          <option value="<%= m %>" <%= "selected" if @month == m %>><%= mes_nombre(m) %></option>
+        <% end %>
+      </select>
+    </div>
+    <div>
+      <label class="text-xs font-semibold text-gray-600 mb-1 block">Año</label>
+      <input type="number" name="year" value="<%= @year %>" class="border border-gray-300 rounded-lg px-3 py-2 text-sm w-28">
+    </div>
+    <button type="submit" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">Ver</button>
+  <% end %>
+
+  <% if @filas.all? { |f| f[:gmv_real].nil? } %>
+    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-700 mb-6">
+      Todavía no hay 1:1 diligenciados en <%= mes_nombre(@month) %> <%= @year %> para calcular los insights del equipo.
+    </div>
+  <% end %>
+
+  <% if @destacados.any? %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <% @destacados.each do |d| %>
+        <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+          <p class="text-xs text-gray-500 font-semibold mb-2"><%= d[:label] %></p>
+          <div class="flex items-center gap-2 mb-1">
+            <% color = kam_color(d[:kam]) %>
+            <span class="w-6 h-6 rounded-full <%= color[:dot] %> text-white text-xs font-bold flex items-center justify-center shrink-0"><%= d[:kam].initial %></span>
+            <p class="text-sm font-semibold text-gray-800"><%= d[:kam].nombre %></p>
+          </div>
+          <p class="text-lg font-bold text-gray-800"><%= d[:tipo] == :entero ? d[:value].to_i : fmt_pct(d[:value]) %></p>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">🎯 Cumplimiento de GMV por KAM</h3>
+      <canvas id="chart-cumplimiento" height="220"></canvas>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">📋 OKR Gestión vs. Asistencia por KAM</h3>
+      <canvas id="chart-okr" height="220"></canvas>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">🔻 Embudo de ventas por KAM</h3>
+      <canvas id="chart-embudo" height="220"></canvas>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">🎯 Tasa de conversión por KAM</h3>
+      <canvas id="chart-conversion" height="220"></canvas>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">🆕 Clientes nuevos vs. perdidos</h3>
+      <canvas id="chart-clientes" height="220"></canvas>
+    </div>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">📈 Crecimiento de GMV vs. mes anterior</h3>
+      <canvas id="chart-crecimiento" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden overflow-x-auto mb-6">
+    <h3 class="text-sm font-semibold text-gray-700 px-4 py-3 border-b border-gray-100">📊 Desempeño comercial</h3>
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+        <tr>
+          <th class="text-left px-4 py-3">KAM</th>
+          <th class="text-right px-4 py-3">Meta GMV</th>
+          <th class="text-right px-4 py-3">GMV real</th>
+          <th class="text-right px-4 py-3">Cumplimiento</th>
+          <th class="text-right px-4 py-3">OKR Gestión</th>
+          <th class="text-right px-4 py-3">OKR Asistencia</th>
+          <th class="text-right px-4 py-3">Crecimiento GMV</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @filas.each do |f| %>
+          <% color = kam_color(f[:kam]) %>
+          <tr class="<%= color[:bg] %> border-l-4 <%= color[:border] %>">
+            <td class="px-4 py-3 font-medium text-gray-800">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full <%= color[:dot] %> text-white text-xs font-bold flex items-center justify-center shrink-0"><%= f[:kam].initial %></span>
+                <%= f[:kam].nombre %>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-right text-gray-600"><%= fmt(f[:gmv_meta]) %></td>
+            <td class="px-4 py-3 text-right text-gray-600"><%= fmt(f[:gmv_real]) %></td>
+            <td class="px-4 py-3 text-right">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(f[:cumplimiento_gmv]) %>"><%= fmt_pct(f[:cumplimiento_gmv]) %></span>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(f[:okr_gestion]) %>"><%= fmt_pct(f[:okr_gestion]) %></span>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(f[:okr_asistencia]) %>"><%= fmt_pct(f[:okr_asistencia]) %></span>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= signo_badge_class(f[:crecimiento_gmv_pct]) %>"><%= fmt_signed_pct(f[:crecimiento_gmv_pct]) %></span>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden overflow-x-auto">
+    <h3 class="text-sm font-semibold text-gray-700 px-4 py-3 border-b border-gray-100">🔻 Embudo y clientes</h3>
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+        <tr>
+          <th class="text-left px-4 py-3">KAM</th>
+          <th class="text-right px-4 py-3">Prospección</th>
+          <th class="text-right px-4 py-3">Reuniones</th>
+          <th class="text-right px-4 py-3">Pipeline</th>
+          <th class="text-right px-4 py-3">Cierres</th>
+          <th class="text-right px-4 py-3">Conversión</th>
+          <th class="text-right px-4 py-3">Clientes activos</th>
+          <th class="text-right px-4 py-3">Nuevos</th>
+          <th class="text-right px-4 py-3">Perdidos</th>
+          <th class="text-right px-4 py-3">% Utilidad</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% @filas.each do |f| %>
+          <% color = kam_color(f[:kam]) %>
+          <tr class="<%= color[:bg] %> border-l-4 <%= color[:border] %>">
+            <td class="px-4 py-3 font-medium text-gray-800">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full <%= color[:dot] %> text-white text-xs font-bold flex items-center justify-center shrink-0"><%= f[:kam].initial %></span>
+                <%= f[:kam].nombre %>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-right text-gray-600"><%= f[:prospeccion].to_i %></td>
+            <td class="px-4 py-3 text-right text-gray-600"><%= f[:reuniones].to_i %></td>
+            <td class="px-4 py-3 text-right text-gray-600"><%= f[:pipeline_negocios].to_i %></td>
+            <td class="px-4 py-3 text-right text-gray-600"><%= f[:cierres].to_i %></td>
+            <td class="px-4 py-3 text-right">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(f[:tasa_conversion]) %>"><%= fmt_pct(f[:tasa_conversion]) %></span>
+            </td>
+            <td class="px-4 py-3 text-right text-gray-600"><%= f[:clientes_activos] || "—" %></td>
+            <td class="px-4 py-3 text-right text-gray-600"><%= f[:clientes_nuevos] || "—" %></td>
+            <td class="px-4 py-3 text-right text-gray-600"><%= f[:clientes_perdidos] || "—" %></td>
+            <td class="px-4 py-3 text-right">
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(f[:pct_utilidad]) %>"><%= fmt_pct(f[:pct_utilidad]) %></span>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script type="module">
+  import "chart.js";
+
+  const nombres = <%= raw @filas.map { |f| f[:kam].nombre }.to_json %>;
+  const filas = <%= raw @filas.to_json(except: [:kam]) %>;
+  const pct = (v) => v === null || v === undefined ? null : Math.round(v * 1000) / 10;
+
+  const colors = {
+    blue: "#3b82f6", green: "#10b981", violet: "#a78bfa", amber: "#f59e0b",
+    pink: "#ec4899", teal: "#2dd4bf", gray: "#9ca3af", red: "#ef4444"
+  };
+
+  new Chart(document.getElementById("chart-cumplimiento"), {
+    type: "bar",
+    data: {
+      labels: nombres,
+      datasets: [ { label: "Cumplimiento GMV", data: filas.map(f => pct(f.cumplimiento_gmv)), backgroundColor: colors.blue } ]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: (v) => v + "%" } } } }
+  });
+
+  new Chart(document.getElementById("chart-okr"), {
+    type: "bar",
+    data: {
+      labels: nombres,
+      datasets: [
+        { label: "OKR Gestión", data: filas.map(f => pct(f.okr_gestion)), backgroundColor: colors.violet },
+        { label: "OKR Asistencia", data: filas.map(f => pct(f.okr_asistencia)), backgroundColor: colors.amber }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: "bottom" } }, scales: { y: { ticks: { callback: (v) => v + "%" } } } }
+  });
+
+  new Chart(document.getElementById("chart-embudo"), {
+    type: "bar",
+    data: {
+      labels: nombres,
+      datasets: [
+        { label: "Prospección", data: filas.map(f => f.prospeccion), backgroundColor: colors.blue },
+        { label: "Reuniones", data: filas.map(f => f.reuniones), backgroundColor: colors.teal },
+        { label: "Pipeline", data: filas.map(f => f.pipeline_negocios), backgroundColor: colors.amber },
+        { label: "Cierres", data: filas.map(f => f.cierres), backgroundColor: colors.green }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+  });
+
+  new Chart(document.getElementById("chart-conversion"), {
+    type: "bar",
+    data: {
+      labels: nombres,
+      datasets: [ { label: "Tasa de conversión", data: filas.map(f => pct(f.tasa_conversion)), backgroundColor: colors.pink } ]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: (v) => v + "%" } } } }
+  });
+
+  new Chart(document.getElementById("chart-clientes"), {
+    type: "bar",
+    data: {
+      labels: nombres,
+      datasets: [
+        { label: "Nuevos", data: filas.map(f => f.clientes_nuevos), backgroundColor: colors.green },
+        { label: "Perdidos", data: filas.map(f => f.clientes_perdidos), backgroundColor: colors.red }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: "bottom" } } }
+  });
+
+  new Chart(document.getElementById("chart-crecimiento"), {
+    type: "bar",
+    data: {
+      labels: nombres,
+      datasets: [ { label: "Crecimiento GMV", data: filas.map(f => pct(f.crecimiento_gmv_pct)), backgroundColor: colors.violet } ]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: (v) => v + "%" } } } }
+  });
+</script>
