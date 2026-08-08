@@ -1,0 +1,89 @@
+<% content_for :title, "Inicio" %>
+<div class="max-w-6xl mx-auto px-4 py-6">
+  <h1 class="text-xl font-bold text-gray-800 mb-1">👋 Hola, <%= current_user.nombre.split.first %></h1>
+  <p class="text-sm text-gray-500 mb-6"><%= mes_nombre(@month) %> <%= @year %></p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <% if permisos["verForecast"] %>
+      <% if current_user.admin? %>
+        <% pct = @total_kams.zero? ? 0 : (@gmv_diligenciado_count.to_f / @total_kams) %>
+        <%= link_to forecast_entries_path, class: "dash-card" do %>
+          <div class="dash-card-inner" style="background: linear-gradient(135deg, #2563eb, #3b82f6);">
+            <span class="dash-icon">📈</span>
+            <h3 class="dash-title">Forecast</h3>
+            <p class="dash-stat"><%= @gmv_diligenciado_count %> / <%= @total_kams %> KAM con GMV diligenciado</p>
+            <div class="dash-progress"><div class="dash-progress-fill" style="width: <%= (pct * 100).round %>%;"></div></div>
+          </div>
+        <% end %>
+      <% else %>
+        <%= link_to forecast_entries_path, class: "dash-card" do %>
+          <div class="dash-card-inner" style="background: linear-gradient(135deg, #2563eb, #3b82f6);">
+            <span class="dash-icon">📈</span>
+            <h3 class="dash-title">Forecast</h3>
+            <% if @mi_one_on_one && @mi_one_on_one.gmv_real.to_f > 0 %>
+              <p class="dash-stat">Cumplimiento: <%= fmt_pct(@mi_one_on_one.cumplimiento_gmv) %></p>
+              <div class="dash-progress"><div class="dash-progress-fill" style="width: <%= [ (@mi_one_on_one.cumplimiento_gmv.to_f * 100).round, 100 ].min %>%;"></div></div>
+            <% else %>
+              <p class="dash-stat">Todavía no diligencias este mes</p>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <% if permisos["gestionarMetas"] %>
+      <% pct = @total_kams.zero? ? 0 : (@goals_count.to_f / @total_kams) %>
+      <%= link_to goals_path, class: "dash-card" do %>
+        <div class="dash-card-inner" style="background: linear-gradient(135deg, #059669, #10b981);">
+          <span class="dash-icon">🎯</span>
+          <h3 class="dash-title">Asignación de Metas</h3>
+          <p class="dash-stat"><%= @goals_count %> / <%= @total_kams %> KAM con meta asignada</p>
+          <div class="dash-progress"><div class="dash-progress-fill" style="width: <%= (pct * 100).round %>%;"></div></div>
+        </div>
+      <% end %>
+    <% end %>
+
+    <% if permisos["ver1a1"] %>
+      <% if current_user.admin? %>
+        <% pct = @total_kams.zero? ? 0 : (@one_on_ones_count.to_f / @total_kams) %>
+        <%= link_to one_on_ones_path, class: "dash-card" do %>
+          <div class="dash-card-inner" style="background: linear-gradient(135deg, #7c3aed, #a78bfa);">
+            <span class="dash-icon">🧑‍💼</span>
+            <h3 class="dash-title">1:1 KAM</h3>
+            <p class="dash-stat"><%= @one_on_ones_count %> / <%= @total_kams %> KAM con 1:1 diligenciado</p>
+            <div class="dash-progress"><div class="dash-progress-fill" style="width: <%= (pct * 100).round %>%;"></div></div>
+          </div>
+        <% end %>
+      <% else %>
+        <%= link_to one_on_ones_path, class: "dash-card" do %>
+          <div class="dash-card-inner" style="background: linear-gradient(135deg, #7c3aed, #a78bfa);">
+            <span class="dash-icon">🧑‍💼</span>
+            <h3 class="dash-title">1:1 KAM</h3>
+            <p class="dash-stat"><%= @mi_one_on_one ? "✓ Diligenciado este mes" : "Pendiente este mes" %></p>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+
+    <% if current_user.admin? %>
+      <%= link_to users_path, class: "dash-card" do %>
+        <div class="dash-card-inner" style="background: linear-gradient(135deg, #d97706, #f59e0b);">
+          <span class="dash-icon">👥</span>
+          <h3 class="dash-title">Usuarios</h3>
+          <p class="dash-stat"><%= @usuarios_activos %> usuarios activos</p>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  .dash-card { display: block; border-radius: 1rem; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.08); transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .dash-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.14); }
+  .dash-card-inner { padding: 1.5rem; color: #ffffff; min-height: 150px; display: flex; flex-direction: column; }
+  .dash-icon { font-size: 1.75rem; margin-bottom: 0.75rem; }
+  .dash-title { font-weight: 700; font-size: 1.125rem; margin-bottom: auto; padding-bottom: 0.75rem; }
+  .dash-stat { font-size: 0.8rem; color: rgba(255,255,255,0.9); margin-bottom: 0.5rem; }
+  .dash-progress { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.3); overflow: hidden; }
+  .dash-progress-fill { height: 100%; background: #ffffff; border-radius: 999px; }
+</style>

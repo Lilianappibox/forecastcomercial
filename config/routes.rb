@@ -18,5 +18,5 @@ Rails.application.routes.draw do
     collection { get :entrar }
   end
 
-  root "forecast_entries#index"
+  root "dashboard#index"
 end

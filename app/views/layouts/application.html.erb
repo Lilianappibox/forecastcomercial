@@ -23,6 +23,10 @@
         </div>
 
         <nav class="flex flex-col gap-1 px-2 py-3 overflow-y-auto" style="max-height: calc(100vh - 140px)">
+          <%= link_to root_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/15 overflow-hidden whitespace-nowrap #{"bg-white !text-purple-700 shadow" if controller_name == "dashboard"}" do %>
+            <span class="text-lg shrink-0 w-6 text-center">🏠</span>
+            <span>Inicio</span>
+          <% end %>
           <% if permisos["verForecast"] %>
             <%= link_to forecast_entries_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/15 overflow-hidden whitespace-nowrap #{"bg-white !text-purple-700 shadow" if controller_name == "forecast_entries"}" do %>
               <span class="text-lg shrink-0 w-6 text-center">📈</span>
