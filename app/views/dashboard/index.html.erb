@@ -65,6 +65,28 @@
       <% end %>
     <% end %>
 
+    <% if permisos["verClientes"] %>
+      <% if current_user.admin? %>
+        <% pct = @total_kams.zero? ? 0 : (@kams_con_clientes_count.to_f / @total_kams) %>
+        <%= link_to clientes_path, class: "dash-card" do %>
+          <div class="dash-card-inner" style="background: linear-gradient(135deg, #0d9488, #2dd4bf);">
+            <span class="dash-icon">🤝</span>
+            <h3 class="dash-title">Clientes</h3>
+            <p class="dash-stat"><%= @kams_con_clientes_count %> / <%= @total_kams %> KAM con clientes cargados</p>
+            <div class="dash-progress"><div class="dash-progress-fill" style="width: <%= (pct * 100).round %>%;"></div></div>
+          </div>
+        <% end %>
+      <% else %>
+        <%= link_to clientes_path, class: "dash-card" do %>
+          <div class="dash-card-inner" style="background: linear-gradient(135deg, #0d9488, #2dd4bf);">
+            <span class="dash-icon">🤝</span>
+            <h3 class="dash-title">Clientes</h3>
+            <p class="dash-stat"><%= @mis_clientes_count %> clientes en tu cartera</p>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+
     <% if current_user.admin? %>
       <%= link_to users_path, class: "dash-card" do %>
         <div class="dash-card-inner" style="background: linear-gradient(135deg, #d97706, #f59e0b);">

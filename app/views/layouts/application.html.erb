@@ -45,6 +45,12 @@
               <span>1:1 KAM</span>
             <% end %>
           <% end %>
+          <% if permisos["verClientes"] %>
+            <%= link_to clientes_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/15 overflow-hidden whitespace-nowrap #{"bg-white !text-purple-700 shadow" if controller_name == "clientes"}" do %>
+              <span class="w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-sm" style="background: #0d9488;">🤝</span>
+              <span>Clientes</span>
+            <% end %>
+          <% end %>
           <% if current_user.admin? %>
             <%= link_to users_path, class: "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/15 overflow-hidden whitespace-nowrap #{"bg-white !text-purple-700 shadow" if controller_name == "users"}" do %>
               <span class="w-6 h-6 shrink-0 rounded-full flex items-center justify-center text-sm" style="background: #f59e0b;">👥</span>

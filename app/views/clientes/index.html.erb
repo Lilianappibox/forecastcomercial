@@ -1,0 +1,69 @@
+<% content_for :title, "Clientes" %>
+<% kam_actual = @kams.find { |k| k.id == @kam_id } %>
+<div class="max-w-6xl mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-bold text-gray-800">🤝 Clientes</h1>
+    <% if permisos["gestionarClientes"] && @kam_id %>
+      <%= link_to "+ Nuevo cliente", new_cliente_path(kam_id: @kam_id), class: "px-4 py-2 text-white rounded-lg text-sm font-semibold hover:opacity-90", style: "background: linear-gradient(135deg, #0d9488, #2dd4bf)" %>
+    <% end %>
+  </div>
+
+  <% if current_user.admin? %>
+    <%= form_with url: clientes_path, method: :get, class: "flex items-end gap-3 mb-6" do %>
+      <div>
+        <label class="text-xs font-semibold text-gray-600 mb-1 block">KAM</label>
+        <select name="kam_id" onchange="this.form.requestSubmit()" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          <% @kams.each do |k| %>
+            <option value="<%= k.id %>" <%= "selected" if k.id == @kam_id %>><%= k.nombre %></option>
+          <% end %>
+        </select>
+      </div>
+      <button type="submit" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">Ver</button>
+    <% end %>
+  <% else %>
+    <p class="text-xs text-gray-400 mb-4">Esta es tu cartera de clientes. El GMV mensual lo carga el equipo administrativo.</p>
+  <% end %>
+
+  <% if @clientes.blank? %>
+    <div class="bg-white rounded-xl border border-gray-100 p-10 text-center text-gray-400 text-sm">
+      <%= kam_actual ? "#{kam_actual.nombre} todavía no tiene clientes registrados." : "Selecciona un KAM para ver su cartera." %>
+    </div>
+  <% else %>
+    <% color = kam_actual ? kam_color(kam_actual) : nil %>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+          <tr>
+            <th class="text-left px-4 py-3">Cliente</th>
+            <% @meses.each do |mes| %>
+              <th class="text-right px-4 py-3 whitespace-nowrap"><%= mes_corto(mes) %></th>
+            <% end %>
+            <th class="text-right px-4 py-3">Total</th>
+            <% if permisos["gestionarClientes"] %>
+              <th class="text-right px-4 py-3">Acción</th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @clientes.each do |cliente| %>
+            <tr class="<%= color[:bg] %> border-l-4 <%= color[:border] %> hover:brightness-95">
+              <td class="px-4 py-3 font-medium text-gray-800"><%= cliente.nombre %></td>
+              <% @meses.each do |mes| %>
+                <td class="px-4 py-3 text-right text-gray-600"><%= fmt(cliente.gmv_de(mes)) %></td>
+              <% end %>
+              <td class="px-4 py-3 text-right font-semibold text-gray-800"><%= fmt(cliente.gmv_total) %></td>
+              <% if permisos["gestionarClientes"] %>
+                <td class="px-4 py-3 text-right space-x-2 whitespace-nowrap">
+                  <%= link_to "✏️", edit_cliente_path(cliente), class: "text-blue-600 hover:underline text-xs" %>
+                  <%= button_to "🗑️", cliente, method: :delete,
+                      data: { turbo_confirm: "¿Eliminar #{cliente.nombre}?" },
+                      class: "text-red-500 hover:underline border-0 bg-transparent cursor-pointer inline text-xs" %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

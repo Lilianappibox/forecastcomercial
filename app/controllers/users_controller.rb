@@ -3,9 +3,11 @@ class UsersController < ApplicationController
   before_action :set_user, only: [ :show, :edit, :update, :destroy ]
 
   PERMISOS_CONFIGURABLES = [
-    { id: "verForecast",    label: "Ver Forecast Comercial" },
-    { id: "gestionarMetas", label: "Asignar Metas (líder comercial)" },
-    { id: "ver1a1",         label: "Ver 1:1 KAM" }
+    { id: "verForecast",       label: "Ver Forecast Comercial" },
+    { id: "gestionarMetas",    label: "Asignar Metas (líder comercial)" },
+    { id: "ver1a1",            label: "Ver 1:1 KAM" },
+    { id: "verClientes",       label: "Ver Clientes" },
+    { id: "gestionarClientes", label: "Gestionar Clientes (cargar/editar cartera)" }
   ].freeze
 
   def index

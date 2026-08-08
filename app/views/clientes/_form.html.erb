@@ -1,0 +1,89 @@
+<%# Locals: cliente, kams %>
+<%= form_with model: cliente, url: (cliente.new_record? ? clientes_path : cliente_path(cliente)), class: "space-y-6", id: "cliente-form" do |f| %>
+  <% if cliente.errors.any? %>
+    <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
+      <p class="font-semibold mb-2">Por favor corrige los siguientes errores:</p>
+      <ul class="list-disc list-inside space-y-1">
+        <% cliente.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="text-xs font-semibold text-gray-600 mb-1 block">KAM *</label>
+      <% if cliente.new_record? %>
+        <%= f.select :user_id, kams.map { |k| [ k.nombre, k.id ] },
+            { include_blank: "Selecciona un KAM" },
+            class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" %>
+      <% else %>
+        <div class="w-full border border-gray-200 bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-600"><%= cliente.user.nombre %></div>
+        <%= f.hidden_field :user_id %>
+      <% end %>
+    </div>
+    <div>
+      <label class="text-xs font-semibold text-gray-600 mb-1 block">Nombre del cliente *</label>
+      <%= f.text_field :nombre, class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" %>
+    </div>
+  </div>
+
+  <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+    <%= render "clientes/gmv_rows", rows: cliente.gmv_ordenado %>
+  </div>
+
+  <div class="flex gap-3">
+    <%= f.submit cliente.new_record? ? "Agregar cliente" : "Actualizar cliente",
+        class: "px-6 py-2 text-white rounded-lg text-sm font-semibold cursor-pointer hover:opacity-90",
+        style: "background: linear-gradient(135deg, #0d9488, #2dd4bf)" %>
+    <%= link_to "Cancelar", clientes_path(kam_id: cliente.user_id), class: "px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium" %>
+  </div>
+<% end %>
+
+<script>
+(function () {
+  function rowToObj(row) {
+    return {
+      mes: row.querySelector(".gmv-mes").value,
+      valor: parseFloat(row.querySelector(".gmv-valor").value || "0")
+    };
+  }
+
+  function serialize(editor) {
+    var rows = editor.querySelectorAll(".gmv-row");
+    var items = [];
+    rows.forEach(function (row) {
+      var obj = rowToObj(row);
+      if (obj.mes.trim() !== "") items.push(obj);
+    });
+    editor.querySelector(".gmv-json-input").value = JSON.stringify(items);
+  }
+
+  document.querySelectorAll(".gmv-editor").forEach(function (editor) {
+    var rowsContainer = editor.querySelector(".gmv-rows");
+
+    editor.querySelector(".gmv-add-row").addEventListener("click", function () {
+      var template = rowsContainer.querySelector(".gmv-row");
+      var clone = template.cloneNode(true);
+      clone.querySelectorAll("input").forEach(function (input) { input.value = ""; });
+      rowsContainer.appendChild(clone);
+    });
+
+    rowsContainer.addEventListener("click", function (e) {
+      if (e.target.classList.contains("gmv-remove-row")) {
+        if (rowsContainer.querySelectorAll(".gmv-row").length > 1) {
+          e.target.closest(".gmv-row").remove();
+        }
+      }
+    });
+  });
+
+  var form = document.getElementById("cliente-form");
+  if (form) {
+    form.addEventListener("submit", function () {
+      document.querySelectorAll(".gmv-editor").forEach(serialize);
+    });
+  }
+})();
+</script>

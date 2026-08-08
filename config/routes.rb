@@ -17,6 +17,7 @@ Rails.application.routes.draw do
   resources :one_on_ones, path: "uno_a_uno", only: [ :index, :show, :edit, :update ] do
     collection { get :entrar }
   end
+  resources :clientes
 
   root "dashboard#index"
 end

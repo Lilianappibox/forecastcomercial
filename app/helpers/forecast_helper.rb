@@ -5,6 +5,13 @@ module ForecastHelper
     MESES[numero.to_i - 1] || "?"
   end
 
+  # Formatea una clave "YYYY-MM" (la que produce <input type="month">) como "Ene 2026".
+  def mes_corto(clave)
+    year, month = clave.to_s.split("-")
+    return clave.to_s if year.blank? || month.blank?
+    "#{mes_nombre(month)[0, 3]} #{year}"
+  end
+
   def fmt_pct(value)
     return "—" if value.nil?
     "#{(value.to_f * 100).round(1)}%"

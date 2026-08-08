@@ -1,0 +1,22 @@
+<%# Locals: rows (Array de hashes {"mes"=>, "valor"=>}) %>
+<div class="gmv-editor" data-field="gmv_mensual">
+  <div class="flex items-center justify-between mb-2">
+    <h4 class="text-sm font-semibold text-gray-700">GMV mensual</h4>
+    <button type="button" class="gmv-add-row text-xs text-teal-600 hover:underline">+ Agregar mes</button>
+  </div>
+  <div class="grid grid-cols-12 gap-2 text-xs font-semibold text-gray-500 mb-1 px-1">
+    <div class="col-span-5">Mes</div>
+    <div class="col-span-5">GMV</div>
+    <div class="col-span-2"></div>
+  </div>
+  <div class="gmv-rows space-y-1">
+    <% (rows.presence || [ {} ]).each do |row| %>
+      <div class="grid grid-cols-12 gap-2 items-center gmv-row">
+        <input type="month" class="col-span-5 border border-gray-300 rounded-lg px-2 py-1.5 text-sm gmv-mes" value="<%= row["mes"] %>">
+        <input type="number" step="0.01" class="col-span-5 border border-gray-300 rounded-lg px-2 py-1.5 text-sm gmv-valor" value="<%= row["valor"] %>">
+        <button type="button" class="gmv-remove-row col-span-2 text-red-500 hover:underline text-xs">Quitar</button>
+      </div>
+    <% end %>
+  </div>
+  <input type="hidden" name="cliente[gmv_mensual]" class="gmv-json-input">
+</div>

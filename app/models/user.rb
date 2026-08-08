@@ -1,15 +1,18 @@
 class User < ApplicationRecord
   has_secure_password
   has_one_attached :foto
+  has_many :clientes, dependent: :destroy
 
   ROLES = { KAM: "KAM", ADMIN: "Administrativo" }.freeze
 
   PERMISOS_BASE = {
     "KAM" => {
-      "verForecast" => true, "gestionarMetas" => false, "ver1a1" => true, "gestionarUsuarios" => false
+      "verForecast" => true, "gestionarMetas" => false, "ver1a1" => true, "gestionarUsuarios" => false,
+      "verClientes" => true, "gestionarClientes" => false
     },
     "Administrativo" => {
-      "verForecast" => true, "gestionarMetas" => true, "ver1a1" => true, "gestionarUsuarios" => true
+      "verForecast" => true, "gestionarMetas" => true, "ver1a1" => true, "gestionarUsuarios" => true,
+      "verClientes" => true, "gestionarClientes" => true
     }
   }.freeze
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_08_013119) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_08_032054) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_08_013119) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "clientes", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.jsonb "gmv_mensual", default: [], null: false
+    t.string "nombre", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_clientes_on_user_id"
   end
 
   create_table "goals", force: :cascade do |t|
@@ -96,6 +105,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_08_013119) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "clientes", "users"
   add_foreign_key "goals", "users"
   add_foreign_key "goals", "users", column: "assigned_by_id"
   add_foreign_key "one_on_one_entries", "users"
