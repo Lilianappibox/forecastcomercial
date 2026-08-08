@@ -1,7 +1,6 @@
 <% content_for :title, "Inicio" %>
 <div class="max-w-6xl mx-auto px-4 py-6">
-  <h1 class="text-xl font-bold text-gray-800 mb-1">👋 Hola, <%= current_user.nombre.split.first %></h1>
-  <p class="text-sm text-gray-500 mb-6"><%= mes_nombre(@month) %> <%= @year %></p>
+  <h1 class="text-xl font-bold text-gray-800 mb-6">👋 Hola, <%= current_user.nombre.split.first %></h1>
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
     <% if permisos["verForecast"] %>
