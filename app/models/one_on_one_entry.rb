@@ -115,24 +115,52 @@ class OneOnOneEntry < ApplicationRecord
       }
     end
 
-    promedio = ->(vals) { vals.compact.presence&.then { |v| v.sum / v.size } }
-    meta_gmv_total = meses.sum { |m| m[:meta_gmv].to_f }
-    gmv_real_total = meses.sum { |m| m[:gmv_real].to_f }
+    { meses: meses, total: combinar_filas(meses) }
+  end
 
-    total = {
-      meta_gmv: meta_gmv_total,
-      gmv_real: gmv_real_total,
-      cumplimiento_gmv: meta_gmv_total.zero? ? nil : gmv_real_total / meta_gmv_total,
-      okr_gestion: promedio.call(meses.map { |m| m[:okr_gestion] }),
-      okr_asistencia: promedio.call(meses.map { |m| m[:okr_asistencia] }),
-      prospeccion: meses.sum { |m| m[:prospeccion].to_f },
-      reuniones: meses.sum { |m| m[:reuniones].to_f },
-      pipeline_negocios: meses.sum { |m| m[:pipeline_negocios].to_f },
-      pipeline_valor: meses.sum { |m| m[:pipeline_valor].to_f },
-      cierres_count: meses.sum { |m| m[:cierres_count].to_i },
-      cierres_gmv: meses.sum { |m| m[:cierres_gmv].to_f }
+  # Mismo resumen que resumen_anual, pero sumando todos los KAM del equipo
+  # (o el subconjunto de kam_ids dado) — para el resumen agregado del home.
+  def self.resumen_equipo(year, kam_ids = nil)
+    kam_ids ||= User.where(rol: "KAM").pluck(:id)
+    resumenes = kam_ids.map { |uid| resumen_anual(uid, year) }
+
+    meses = (1..12).map do |m|
+      combinar_filas(resumenes.map { |r| r[:meses][m - 1] }).merge(mes: m)
+    end
+
+    { meses: meses, total: combinar_filas(meses) }
+  end
+
+  # Combina varias filas (de distintos meses o distintos KAM, misma forma que
+  # resumen_anual#meses) en una sola: suma montos/conteos y promedia los % de OKR
+  # ya ponderados (cumplimiento_gmv se recalcula como Σreal/Σmeta, no como promedio
+  # de razones, para no distorsionar el resultado con meses/KAM sin meta).
+  def self.combinar_filas(filas)
+    meta_gmv = filas.sum { |f| f[:meta_gmv].to_f }
+    gmv_real = filas.sum { |f| f[:gmv_real].to_f }
+
+    {
+      meta_gmv: meta_gmv,
+      gmv_real: gmv_real,
+      cumplimiento_gmv: meta_gmv.zero? ? nil : gmv_real / meta_gmv,
+      okr_gestion: promedio(filas.map { |f| f[:okr_gestion] }),
+      okr_asistencia: promedio(filas.map { |f| f[:okr_asistencia] }),
+      prospeccion: filas.sum { |f| f[:prospeccion].to_f },
+      prospeccion_propios: filas.sum { |f| f[:prospeccion_propios].to_f },
+      prospeccion_referidos: filas.sum { |f| f[:prospeccion_referidos].to_f },
+      prospeccion_mkt: filas.sum { |f| f[:prospeccion_mkt].to_f },
+      reuniones: filas.sum { |f| f[:reuniones].to_f },
+      pipeline_negocios: filas.sum { |f| f[:pipeline_negocios].to_f },
+      pipeline_valor: filas.sum { |f| f[:pipeline_valor].to_f },
+      pipeline_valor_mkt: filas.sum { |f| f[:pipeline_valor_mkt].to_f },
+      pipeline_valor_referidos: filas.sum { |f| f[:pipeline_valor_referidos].to_f },
+      pipeline_valor_propios: filas.sum { |f| f[:pipeline_valor_propios].to_f },
+      cierres_count: filas.sum { |f| f[:cierres_count].to_i },
+      cierres_gmv: filas.sum { |f| f[:cierres_gmv].to_f }
     }
+  end
 
-    { meses: meses, total: total }
+  def self.promedio(vals)
+    vals.compact.presence&.then { |v| v.sum / v.size }
   end
 end
