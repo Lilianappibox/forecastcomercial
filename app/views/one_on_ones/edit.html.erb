@@ -137,10 +137,13 @@
     return [ "bg-red-100", "text-red-700" ];
   }
 
-  function applyBadge(el, value, prefix) {
+  // displayValue se muestra como texto; colorValue (si se pasa) decide el color del badge —
+  // útil cuando el número mostrado es el "ponderado" pero el color debe reflejar el avance real del ítem.
+  function applyBadge(el, displayValue, prefix, colorValue) {
+    if (colorValue === undefined) colorValue = displayValue;
     el.classList.remove("bg-gray-100", "text-gray-500", "bg-green-100", "text-green-700", "bg-yellow-100", "text-yellow-700", "bg-red-100", "text-red-700");
-    pctBadgeClasses(value).forEach(function (c) { el.classList.add(c); });
-    el.textContent = (prefix || "") + fmtPct(value);
+    pctBadgeClasses(colorValue).forEach(function (c) { el.classList.add(c); });
+    el.textContent = (prefix || "") + fmtPct(displayValue);
   }
 
   function updateGmvCumplimiento() {
@@ -157,22 +160,28 @@
   if (gmvInput) gmvInput.addEventListener("input", updateGmvCumplimiento);
 
   document.querySelectorAll(".realizado-editor").forEach(function (editor) {
-    function updateRow(row) {
+    // Cumplimiento del ítem, con tope de 100% (no deja que un OKR sobre-cumplido
+    // infle el total). "Ponderado" es lo que ese ítem aporta al total: cumplimiento × participación.
+    function cumplimientoDe(row) {
       var meta = parseFloat(row.dataset.meta || "0");
       var input = row.querySelector(".realizado-valor");
-      var real = parseFloat(input.value || "");
-      var cumplimiento = (meta > 0 && input.value !== "") ? real / meta : null;
-      applyBadge(row.querySelector(".cumplimiento-valor"), cumplimiento, "");
+      if (!(meta > 0) || input.value === "") return null;
+      var real = parseFloat(input.value);
+      return Math.min(real / meta, 1);
+    }
+
+    function updateRow(row) {
+      var cumplimiento = cumplimientoDe(row);
+      var participacion = parseFloat(row.dataset.participacion || "0");
+      var ponderado = cumplimiento === null ? null : cumplimiento * participacion;
+      applyBadge(row.querySelector(".cumplimiento-valor"), ponderado, "", cumplimiento);
     }
 
     function updateTotal() {
       var total = 0;
       editor.querySelectorAll(".realizado-row").forEach(function (row) {
-        var meta = parseFloat(row.dataset.meta || "0");
+        var cumplimiento = cumplimientoDe(row) || 0;
         var participacion = parseFloat(row.dataset.participacion || "0");
-        var input = row.querySelector(".realizado-valor");
-        var real = parseFloat(input.value || "0");
-        var cumplimiento = (meta > 0 && input.value !== "") ? real / meta : 0;
         total += cumplimiento * participacion;
       });
       applyBadge(editor.querySelector(".total-cumplimiento"), total, "Total: ");

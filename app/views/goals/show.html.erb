@@ -57,7 +57,7 @@
               <td class="px-3 py-2 text-right text-gray-600"><%= fmt_meta(row[:meta], row[:unidad]) %></td>
               <td class="px-3 py-2 text-right text-gray-600"><%= fmt_meta(row[:realizado], row[:unidad]) %></td>
               <td class="px-3 py-2 text-right">
-                <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(row[:cumplimiento]) %>"><%= fmt_pct(row[:cumplimiento]) %></span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-semibold <%= pct_badge_class(row[:cumplimiento]) %>"><%= fmt_pct(row[:ponderado]) %></span>
               </td>
             </tr>
           <% end %>

@@ -25,7 +25,7 @@
           data-nombre="<%= row[:nombre] %>"
           value="<%= row[:realizado] %>">
         <div class="col-span-2">
-          <span class="px-2 py-0.5 rounded-full text-xs font-semibold cumplimiento-valor <%= pct_badge_class(row[:cumplimiento]) %>"><%= fmt_pct(row[:cumplimiento]) %></span>
+          <span class="px-2 py-0.5 rounded-full text-xs font-semibold cumplimiento-valor <%= pct_badge_class(row[:cumplimiento]) %>"><%= fmt_pct(row[:ponderado]) %></span>
         </div>
         <div class="col-span-2 text-sm text-gray-500 px-2"><%= fmt_pct(row[:participacion]) %></div>
       </div>

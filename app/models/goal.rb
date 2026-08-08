@@ -21,7 +21,9 @@ class Goal < ApplicationRecord
   # Cruza los OKR asignados (meta, participación) con lo "realizado" que el KAM
   # diligencia en su 1:1 (OneOnOneEntry#okr_gestion_real / #okr_asistencia_real),
   # por "nombre". Devuelve un array de filas listas para tabla: nombre, participación,
-  # meta, realizado, cumplimiento.
+  # meta, realizado, cumplimiento (avance del ítem, tope 100%) y ponderado (lo que
+  # ese ítem aporta al total: cumplimiento × participación — la suma de "ponderado"
+  # de todas las filas da el "Total cumplimiento OKR").
   def okr_rows(tipo, realizados)
     items = tipo == :gestion ? okr_gestion : okr_asistencia
     realizados_por_nombre = (realizados || []).index_by { |r| r["nombre"] }
@@ -30,20 +32,22 @@ class Goal < ApplicationRecord
       meta_valor = item["meta"].to_f
       realizado_item = realizados_por_nombre[item["nombre"]]
       realizado_valor = realizado_item&.dig("realizado")
-      cumplimiento = meta_valor.zero? || realizado_valor.nil? ? nil : realizado_valor.to_f / meta_valor
+      participacion = item["participacion"].to_f
+      cumplimiento = meta_valor.zero? || realizado_valor.nil? ? nil : [ realizado_valor.to_f / meta_valor, 1.0 ].min
 
       {
         nombre: item["nombre"],
-        participacion: item["participacion"].to_f,
+        participacion: participacion,
         meta: item["meta"],
         unidad: item["unidad"],
         realizado: realizado_valor,
-        cumplimiento: cumplimiento
+        cumplimiento: cumplimiento,
+        ponderado: cumplimiento.nil? ? nil : cumplimiento * participacion
       }
     end
   end
 
   def total_ponderado(tipo, realizados)
-    okr_rows(tipo, realizados).sum { |row| row[:cumplimiento].to_f * row[:participacion] }
+    okr_rows(tipo, realizados).sum { |row| row[:ponderado].to_f }
   end
 end
