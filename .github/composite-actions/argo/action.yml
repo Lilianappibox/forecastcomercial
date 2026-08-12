@@ -1,0 +1,39 @@
+name: Deploy Argo CD
+description: Update Helm values via Argo CD
+inputs:
+  github_auth:
+    description: "GitHub auth token."
+    required: true
+  file_dir:
+    description: "File dir."
+    required: true
+  path_helm:
+    description: "Path helm values."
+    required: true
+  image_name:
+    description: "Docker image name."
+    required: true
+  sso_shared_secret:
+    description: "Shared secret for SSO between Academia and Forecast."
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Update Helm chart
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: .github/argo.Dockerfile
+        builder: ${{ steps.buildx.outputs.name }}
+        no-cache: true
+        build-args: |
+          GITHUB_AUTH=${{ inputs.github_auth }}
+          FILE_DIR=${{ inputs.file_dir }}
+          PATH_HELM=${{ inputs.path_helm }}
+          IMAGE_NAME=${{ inputs.image_name }}
+          SSO_SHARED_SECRET=${{ inputs.sso_shared_secret }}
+        tags: picap-argo:${{ github.sha }}

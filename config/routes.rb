@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # SSO
+  get "/sso", to: "sso#login", as: :sso_login
+
   # Auth
   get    "/login",  to: "sessions#new",     as: :login
   post   "/login",  to: "sessions#create"
