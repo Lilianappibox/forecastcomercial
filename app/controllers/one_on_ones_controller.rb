@@ -1,6 +1,6 @@
 class OneOnOnesController < ApplicationController
   before_action :check_permiso
-  before_action :set_entry, only: [ :show, :edit, :update, :guardar_en_historial ]
+  before_action :set_entry, only: [ :show, :edit, :update, :guardar_en_historial, :reuniones_calendar ]
 
   def index
     if current_user.admin?
@@ -62,6 +62,37 @@ class OneOnOnesController < ApplicationController
     else
       redirect_to edit_one_on_one_path(@entry), alert: destino.errors.full_messages.to_sentence
     end
+  end
+
+  # Trae las reuniones del calendario de Google del propio KAM para el mes de
+  # esta hoja — solo el dueño del calendario puede consultarlo (el admin no
+  # tiene el token OAuth de otro KAM).
+  def reuniones_calendar
+    unless @entry.user_id == current_user.id && current_user.google_conectado?
+      head :forbidden and return
+    end
+
+    service = current_user.google_calendar_service
+    inicio = Date.new(@entry.year, @entry.month, 1).beginning_of_day
+    fin = inicio.end_of_month.end_of_day
+    respuesta = service.list_events(
+      "primary", time_min: inicio.rfc3339, time_max: fin.rfc3339,
+      single_events: true, order_by: "startTime", max_results: 100
+    )
+    current_user.sincronizar_token_google!(service)
+
+    eventos = (respuesta.items || []).select { |e| e.summary.present? }.map do |e|
+      inicio_evento = e.start&.date_time || e.start&.date
+      {
+        titulo: e.summary,
+        fecha: inicio_evento&.strftime("%d/%m %H:%M") || "",
+        invitados: (e.attendees || []).filter_map(&:email).join(", ")
+      }
+    end
+
+    render partial: "one_on_ones/eventos_calendar", locals: { eventos: eventos }
+  rescue Signet::AuthorizationError, Google::Apis::AuthorizationError
+    render html: '<p class="text-xs text-red-600">Tu conexión con Google expiró — vuelve a conectar tu calendario.</p>'.html_safe
   end
 
   private

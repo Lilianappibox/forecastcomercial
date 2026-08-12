@@ -3,6 +3,8 @@ class User < ApplicationRecord
   has_one_attached :foto
   has_many :cliente_archivos, dependent: :destroy
 
+  encrypts :google_access_token, :google_refresh_token
+
   ROLES = { KAM: "KAM", ADMIN: "Administrativo" }.freeze
 
   PERMISOS_BASE = {
@@ -63,6 +65,39 @@ class User < ApplicationRecord
 
   def clear_password_reset!
     update_columns(password_reset_token: nil, password_reset_sent_at: nil)
+  end
+
+  def google_conectado?
+    google_refresh_token.present?
+  end
+
+  def google_calendar_service
+    return nil unless google_conectado?
+    service = Google::Apis::CalendarV3::CalendarService.new
+    service.authorization = Google::Auth::UserRefreshCredentials.new(
+      client_id: Rails.application.credentials.dig(:google, :client_id),
+      client_secret: Rails.application.credentials.dig(:google, :client_secret),
+      scope: Google::Apis::CalendarV3::AUTH_CALENDAR_READONLY,
+      refresh_token: google_refresh_token,
+      access_token: google_access_token,
+      expires_at: google_token_expires_at
+    )
+    service
+  end
+
+  # Signet puede refrescar el access token en memoria al hacer la llamada a la
+  # API (si ya había expirado) — esto lo persiste para no reautenticar cada vez.
+  def sincronizar_token_google!(service)
+    creds = service.authorization
+    return if creds.access_token == google_access_token
+    update_columns(google_access_token: creds.access_token, google_token_expires_at: creds.expires_at)
+  end
+
+  def desconectar_google!
+    update_columns(
+      google_access_token: nil, google_refresh_token: nil,
+      google_token_expires_at: nil, google_email: nil
+    )
   end
 
   private

@@ -8,6 +8,10 @@ Rails.application.routes.draw do
 
   resources :password_resets, only: [ :new, :create, :edit, :update ]
 
+  get    "/auth/google/connect",  to: "google_auth#connect",    as: :google_connect
+  get    "/auth/google/callback", to: "google_auth#callback",   as: :google_callback
+  delete "/auth/google/disconnect", to: "google_auth#disconnect", as: :google_disconnect
+
   resources :users
 
   resources :goals, path: "metas" do
@@ -16,7 +20,7 @@ Rails.application.routes.draw do
   resources :forecast_entries, path: "forecast", only: [ :index ]
   resources :one_on_ones, path: "uno_a_uno", only: [ :index, :show, :edit, :update ] do
     collection { get :entrar; get :evolucion }
-    member { patch :guardar_en_historial }
+    member { patch :guardar_en_historial; get :reuniones_calendar }
   end
   resources :cliente_archivos, path: "clientes", as: "clientes", only: [ :index, :show, :create, :destroy ]
   resources :insights, only: [ :index ]

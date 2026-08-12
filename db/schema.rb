@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_08_044421) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_12_035732) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -94,6 +94,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_08_044421) do
     t.string "celular"
     t.datetime "created_at", null: false
     t.string "email", null: false
+    t.text "google_access_token"
+    t.string "google_email"
+    t.text "google_refresh_token"
+    t.datetime "google_token_expires_at"
     t.string "nombre", null: false
     t.string "password_digest", null: false
     t.datetime "password_reset_sent_at"

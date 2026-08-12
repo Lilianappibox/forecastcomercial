@@ -56,4 +56,10 @@ class ApplicationController < ActionController::Base
     "$#{num.abs.to_s.reverse.gsub(/(\d{3})(?=\d)/, "\\1.").reverse}"
   end
   helper_method :fmt
+
+  def google_calendar_configurado?
+    Rails.application.credentials.dig(:google, :client_id).present? &&
+      Rails.application.credentials.dig(:google, :client_secret).present?
+  end
+  helper_method :google_calendar_configurado?
 end

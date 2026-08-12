@@ -84,6 +84,33 @@
       <%= render "scalar_group", field_name: "reuniones", titulo: "🤝 Reuniones / Visitas",
           values: @entry.seccion(:reuniones),
           fields: [ { key: "cantidad", label: "# Reuniones" } ] %>
+
+      <% if @entry.user_id == current_user.id && (google_calendar_configurado? || current_user.google_conectado?) %>
+        <div class="mt-4 pt-4 border-t border-gray-100 no-print">
+          <% if current_user.google_conectado? %>
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <p class="text-xs text-gray-500">📅 Google Calendar conectado — <strong><%= current_user.google_email %></strong></p>
+              <div class="flex gap-3 items-center">
+                <button type="button" id="cargar-calendar-btn" class="text-xs text-purple-600 hover:underline">Cargar reuniones de tu calendario</button>
+                <%= button_to "Desconectar", google_disconnect_path, method: :delete,
+                    class: "text-xs text-red-500 hover:underline border-0 bg-transparent cursor-pointer p-0" %>
+              </div>
+            </div>
+            <div id="calendar-eventos-container"></div>
+            <% eventos_guardados = @entry.seccion(:reuniones)&.dig("eventos") %>
+            <% if eventos_guardados.present? %>
+              <div class="mt-2 space-y-0.5">
+                <p class="text-xs font-semibold text-gray-500">Reuniones importadas en este 1:1:</p>
+                <% eventos_guardados.each do |ev| %>
+                  <p class="text-xs text-gray-500">• <%= ev["titulo"] %> — <%= ev["fecha"] %></p>
+                <% end %>
+              </div>
+            <% end %>
+          <% else %>
+            <%= link_to "🔗 Conectar Google Calendar", google_connect_path, class: "text-xs text-purple-600 hover:underline" %>
+          <% end %>
+        </div>
+      <% end %>
     </div>
 
     <div class="bg-white shadow-sm rounded-xl border border-gray-100 p-4">
@@ -287,6 +314,11 @@
       editor.querySelectorAll(".scalar-field").forEach(function (input) {
         if (input.value !== "") obj[input.dataset.key] = parseFloat(input.value);
       });
+      // Las reuniones importadas de Google Calendar se guardan aparte (no son
+      // un scalar-field) para conservar el detalle, no solo el conteo.
+      if (editor.dataset.field === "reuniones" && window.reunionesEventosImportados) {
+        obj.eventos = window.reunionesEventosImportados;
+      }
       data[editor.dataset.field] = obj;
     });
 
@@ -331,6 +363,38 @@
   if (openHistorialBtn && historialModal) {
     openHistorialBtn.addEventListener("click", function () { historialModal.classList.remove("hidden"); });
     cancelHistorialBtn.addEventListener("click", function () { historialModal.classList.add("hidden"); });
+  }
+
+  var cargarCalendarBtn = document.getElementById("cargar-calendar-btn");
+  var calendarContainer = document.getElementById("calendar-eventos-container");
+  if (cargarCalendarBtn && calendarContainer) {
+    cargarCalendarBtn.addEventListener("click", function () {
+      var textoOriginal = cargarCalendarBtn.textContent;
+      cargarCalendarBtn.textContent = "Cargando...";
+      fetch("<%= reuniones_calendar_one_on_one_path(@entry) %>", { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+          calendarContainer.innerHTML = html;
+          cargarCalendarBtn.textContent = textoOriginal;
+        })
+        .catch(function () {
+          calendarContainer.innerHTML = '<p class="text-xs text-red-600 mt-2">No se pudo cargar el calendario.</p>';
+          cargarCalendarBtn.textContent = textoOriginal;
+        });
+    });
+
+    calendarContainer.addEventListener("click", function (e) {
+      if (e.target && e.target.id === "importar-eventos-btn") {
+        var checks = calendarContainer.querySelectorAll(".calendar-evento-check:checked");
+        var eventos = Array.prototype.map.call(checks, function (c) {
+          return { titulo: c.dataset.titulo, fecha: c.dataset.fecha, invitados: c.dataset.invitados };
+        });
+        window.reunionesEventosImportados = eventos;
+        var cantidadInput = document.querySelector('.scalar-editor[data-field="reuniones"] .scalar-field[data-key="cantidad"]');
+        if (cantidadInput) cantidadInput.value = eventos.length;
+        calendarContainer.innerHTML = '<p class="text-xs text-green-600 mt-2">✓ ' + eventos.length + " reunion" + (eventos.length === 1 ? "" : "es") + ' seleccionadas — se guardan al hacer clic en "Guardar 1:1".</p>';
+      }
+    });
   }
 })();
 </script>
