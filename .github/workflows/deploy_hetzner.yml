@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
       - name: add master.key
         run: echo ${{ secrets.MASTER_KEY }} > config/master.key
       - name: GitHub Action for DigitalOcean - doctl
