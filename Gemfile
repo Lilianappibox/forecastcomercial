@@ -62,4 +62,4 @@ end
 gem "roo", "~> 3.0"
 
 gem "googleauth", "~> 1.17"
-gem "google-apis-calendar_v3", "~> 0.57.0"
+gem "google-apis-calendar_v3", "~> 0.58.0"
